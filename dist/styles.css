@@ -159,6 +159,7 @@ a {
   border: 1px solid var(--ink);
   background: var(--acid);
   font-weight: 700;
+  text-decoration: none;
 }
 
 .hero {
