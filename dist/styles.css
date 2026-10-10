@@ -123,8 +123,8 @@ a {
   height: 30px;
   display: grid;
   place-items: center;
-  color: var(--paper);
-  background: var(--ink);
+  color: var(--ink);
+  background: var(--acid);
   font-family: var(--mono);
   font-size: 11px;
 }
@@ -1427,8 +1427,8 @@ a {
 
 .nft-section {
   padding-top: 100px;
-  padding-bottom: 62px;
-  border-bottom: 14px solid var(--paper);
+  padding-bottom: 36px;
+  border-bottom: 30px solid var(--paper);
   background: var(--ink);
   color: var(--white);
 }
@@ -1461,6 +1461,8 @@ a {
 
 .nft-instrument {
   align-self: center;
+  margin-right: 34px;
+  margin-left: -34px;
   border: 1px solid #604b58;
 }
 
@@ -1755,8 +1757,6 @@ a {
 
 .site-footer p { margin: 0; text-align: center; }
 .site-footer > a { justify-self: end; text-decoration: none; }
-.site-footer .wordmark-mark { color: var(--ink); background: var(--acid); }
-
 .flash {
   animation: flash 320ms ease;
 }
@@ -1789,6 +1789,11 @@ a {
   }
 
   .hero-ledger {
+    margin-right: 14px;
+    margin-left: -14px;
+  }
+
+  .nft-instrument {
     margin-right: 14px;
     margin-left: -14px;
   }
@@ -1855,6 +1860,11 @@ a {
   }
 
   .hero-ledger {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .nft-instrument {
     margin-right: 0;
     margin-left: 0;
   }
@@ -1972,7 +1982,7 @@ a {
   .comparison-row dl { grid-column: auto; }
   .comparison-axis { display: none; }
 
-  .nft-section,
+  .nft-section { padding-top: 75px; padding-bottom: 48px; border-bottom-width: 24px; }
   .sources-section { padding-top: 75px; padding-bottom: 80px; }
   .nft-instrument, .share-card, .source-list { margin-top: 38px; }
 
