@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ascend Flow Lab is an unofficial interactive explorer for Ascend's proposed fee and capital allocation model on Elysium."
+    />
+    <meta name="theme-color" content="#efede5" />
+    <meta property="og:title" content="Ascend Flow Lab" />
+    <meta property="og:description" content="Follow every dollar through Ascend's proposed economic model." />
+    <title>Ascend Flow Lab — Follow every dollar</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#model">Skip to the model</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Ascend Flow Lab home">
+        <span class="wordmark-mark" aria-hidden="true">A↗</span>
+        <span>Ascend Flow Lab</span>
+      </a>
+      <div class="header-meta">
+        <span class="status-pill">Unofficial community tool</span>
+        <a href="#sources">Sources</a>
+        <button class="text-button" id="resetButton" type="button">Reset model</button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero page-grid" aria-labelledby="hero-title">
+        <div class="hero-index" aria-hidden="true">
+          <span>FIELD NOTE</span>
+          <strong>01—26</strong>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Ascend economics, made legible</p>
+          <h1 id="hero-title">Follow<br /><em>every</em> dollar.</h1>
+          <p class="hero-lede">
+            Turn trading activity into a traceable map of creator payouts, HYPE purchases,
+            ecosystem support, KNTQ burns and staker rewards.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#model">Open the flow model <span aria-hidden="true">↓</span></a>
+            <a class="secondary-action" href="https://ascendlaunch.gitbook.io/docs" target="_blank" rel="noreferrer">
+              Read the litepaper <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+
+        <aside class="hero-ledger" aria-label="Model facts">
+          <div class="ledger-heading">
+            <span>MODEL BASIS</span>
+            <span>SEP 2026</span>
+          </div>
+          <dl>
+            <div>
+              <dt>Token trading fee</dt>
+              <dd>1.00%</dd>
+            </div>
+            <div>
+              <dt>Protocol split</dt>
+              <dd>50 / 50</dd>
+            </div>
+            <div>
+              <dt>Protocol token</dt>
+              <dd>None</dd>
+            </div>
+            <div>
+              <dt>Model status</dt>
+              <dd>Proposed</dd>
+            </div>
+          </dl>
+          <p>Selected parameters and implementation details remain under development.</p>
+        </aside>
+
+        <div class="network-tape" aria-live="polite">
+          <span class="pulse-dot" id="networkDot" aria-hidden="true"></span>
+          <span>Elysium testnet</span>
+          <span>Chain 99801</span>
+          <span id="blockStatus">Checking network…</span>
+        </div>
+      </section>
+
+      <section class="model-section" id="model" aria-labelledby="model-title">
+        <div class="section-heading page-grid">
+          <div class="section-number">01</div>
+          <div>
+            <p class="eyebrow">Interactive model</p>
+            <h2 id="model-title">One input.<br />The whole system.</h2>
+          </div>
+          <p class="section-intro">
+            Set an average daily token volume, choose the recipient arrangement, then inspect
+            where the fee lands. Values are illustrative USD equivalents—not forecasts.
+          </p>
+        </div>
+
+        <div class="workbench page-grid">
+          <aside class="control-panel" aria-label="Model controls">
+            <div class="control-kicker">
+              <span>INPUT CONSOLE</span>
+              <span id="periodCode">/ DAY</span>
+            </div>
+
+            <fieldset class="control-group">
+              <legend>Average daily token volume</legend>
+              <label class="money-input-wrap">
+                <span aria-hidden="true">$</span>
+                <input id="volumeInput" type="number" min="0" max="1000000000" step="10000" value="1000000" />
+              </label>
+              <input
+                id="volumeRange"
+                class="range-input"
+                type="range"
+                min="50000"
+                max="50000000"
+                step="50000"
+                value="1000000"
+                aria-label="Average daily token volume"
+              />
+              <div class="preset-row" aria-label="Volume presets">
+                <button type="button" data-volume="100000">$100K</button>
+                <button type="button" data-volume="1000000" class="active">$1M</button>
+                <button type="button" data-volume="10000000">$10M</button>
+                <button type="button" data-volume="50000000">$50M</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="control-group">
+              <legend>Recipient arrangement</legend>
+              <div class="choice-stack">
+                <label class="choice-card">
+                  <input type="radio" name="recipient" value="deployer" checked />
+                  <span class="choice-copy">
+                    <strong>Default deployer</strong>
+                    <small>No approved active creator or takeover operator</small>
+                  </span>
+                  <span class="choice-value">25%</span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="recipient" value="approved" />
+                  <span class="choice-copy">
+                    <strong>Approved creator / takeover</strong>
+                    <small>Subject to Ascend approval</small>
+                  </span>
+                  <span class="choice-value">50%</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="control-group">
+              <legend>View totals by</legend>
+              <div class="segmented-control">
+                <label><input type="radio" name="period" value="day" checked /><span>Day</span></label>
+                <label><input type="radio" name="period" value="month" /><span>30 days</span></label>
+                <label><input type="radio" name="period" value="year" /><span>365 days</span></label>
+              </div>
+            </fieldset>
+
+            <div class="model-note">
+              <span aria-hidden="true">※</span>
+              <p>Separate swap fees, network fees, execution costs and price movement are excluded.</p>
+            </div>
+          </aside>
+
+          <div class="flow-board" aria-label="Ascend fee allocation flow">
+            <div class="flow-board-header">
+              <div>
+                <p class="micro-label">CURRENT RUN</p>
+                <h3 id="scenarioTitle">Default deployer · daily view</h3>
+              </div>
+              <div class="run-id">RUN <span id="runId">A1-1000</span></div>
+            </div>
+
+            <div class="flow-sequence">
+              <article class="flow-node source-node">
+                <div>
+                  <span class="node-index">A</span>
+                  <p>Token trading volume</p>
+                </div>
+                <strong data-value="volume">$1,000,000</strong>
+                <small>Illustrative USD-equivalent volume</small>
+              </article>
+
+              <div class="flow-link" aria-hidden="true">
+                <span>1% trading fee</span>
+              </div>
+
+              <article class="flow-node fee-node">
+                <div>
+                  <span class="node-index">B</span>
+                  <p>Fees collected</p>
+                </div>
+                <strong data-value="grossFee">$10,000</strong>
+                <div class="node-meter"><span style="width: 100%"></span></div>
+              </article>
+
+              <div class="branch-label" aria-hidden="true">Recipient paid first</div>
+
+              <div class="primary-split">
+                <article class="flow-node recipient-node">
+                  <div>
+                    <span class="node-index">C1</span>
+                    <p id="recipientLabel">Deployer payout</p>
+                  </div>
+                  <strong data-value="recipient">$2,500</strong>
+                  <small><span data-value="recipientRate">25%</span> of token trading fees</small>
+                  <div class="node-meter orange"><span id="recipientMeter" style="width: 25%"></span></div>
+                </article>
+
+                <article class="flow-node net-node">
+                  <div>
+                    <span class="node-index">C2</span>
+                    <p>Net protocol revenue</p>
+                  </div>
+                  <strong data-value="net">$7,500</strong>
+                  <small>Remaining after recipient payment</small>
+                  <div class="node-meter cobalt"><span id="netMeter" style="width: 75%"></span></div>
+                </article>
+              </div>
+
+              <div class="allocation-rule">
+                <span>NET REVENUE ALLOCATION</span>
+                <strong>50 / 50</strong>
+              </div>
+
+              <div class="allocation-grid">
+                <section class="allocation-column hype-column" aria-labelledby="hype-heading">
+                  <header>
+                    <div>
+                      <span class="allocation-code">H</span>
+                      <h4 id="hype-heading">HYPE purchases</h4>
+                    </div>
+                    <strong data-value="hype">$3,750</strong>
+                  </header>
+                  <div class="segment-bar" aria-hidden="true">
+                    <span style="--size: 40"></span><span style="--size: 30"></span><span style="--size: 20"></span><span style="--size: 10"></span>
+                  </div>
+                  <ol class="destination-list">
+                    <li>
+                      <span class="destination-number">40%</span>
+                      <div><strong>Protocol-owned staking</strong><small>Yield funds ecosystem-token purchases for burning</small></div>
+                      <b data-value="hypeStaking">$1,500</b>
+                    </li>
+                    <li>
+                      <span class="destination-number">30%</span>
+                      <div><strong>Ecosystem-token buybacks</strong><small>Treasury retention and listing support; a small portion burned</small></div>
+                      <b data-value="hypeEcosystem">$1,125</b>
+                    </li>
+                    <li>
+                      <span class="destination-number">20%</span>
+                      <div><strong>Treasury &amp; operations</strong><small>Development, infrastructure and operations</small></div>
+                      <b data-value="hypeTreasury">$750</b>
+                    </li>
+                    <li>
+                      <span class="destination-number">10%</span>
+                      <div><strong>Direct staker rewards</strong><small>The only pool affected by eligible NFT weighting</small></div>
+                      <b data-value="hypeRewards">$375</b>
+                    </li>
+                  </ol>
+                </section>
+
+                <section class="allocation-column kntq-column" aria-labelledby="kntq-heading">
+                  <header>
+                    <div>
+                      <span class="allocation-code">K</span>
+                      <h4 id="kntq-heading">KNTQ purchases</h4>
+                    </div>
+                    <strong data-value="kntq">$3,750</strong>
+                  </header>
+                  <div class="segment-bar three" aria-hidden="true">
+                    <span style="--size: 60"></span><span style="--size: 20"></span><span style="--size: 20"></span>
+                  </div>
+                  <ol class="destination-list">
+                    <li>
+                      <span class="destination-number">60%</span>
+                      <div><strong>KNTQ burn</strong><small>Sent to the Hyperliquid Assistance Fund</small></div>
+                      <b data-value="kntqBurn">$2,250</b>
+                    </li>
+                    <li>
+                      <span class="destination-number">20%</span>
+                      <div><strong>KNTQ / kHYPE liquidity</strong><small>Protocol-owned liquidity</small></div>
+                      <b data-value="kntqLiquidity">$750</b>
+                    </li>
+                    <li>
+                      <span class="destination-number">20%</span>
+                      <div><strong>Ascend points program</strong><small>Seasonal liquid KNTQ distributions</small></div>
+                      <b data-value="kntqPoints">$750</b>
+                    </li>
+                  </ol>
+                </section>
+              </div>
+            </div>
+
+            <details class="flow-table-wrap">
+              <summary>Accessible flow table</summary>
+              <table>
+                <thead><tr><th>Destination</th><th>Basis</th><th>Modeled value</th></tr></thead>
+                <tbody id="flowTableBody"></tbody>
+              </table>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="comparison-section" aria-labelledby="comparison-title">
+        <div class="page-grid section-heading compact">
+          <div class="section-number">02</div>
+          <div>
+            <p class="eyebrow">Scenario comparison</p>
+            <h2 id="comparison-title">Same activity.<br />Different routing.</h2>
+          </div>
+          <p class="section-intro">
+            A larger creator payout means less net protocol revenue enters the HYPE and KNTQ allocation framework.
+            These arrangements are alternatives, not cumulative payments.
+          </p>
+        </div>
+
+        <div class="comparison-board page-grid">
+          <div class="comparison-axis" aria-hidden="true">
+            <span>0</span><span>25</span><span>50</span><span>75</span><span>100%</span>
+          </div>
+          <article class="comparison-row">
+            <header><span>01</span><div><strong>Default deployer</strong><small>25% recipient share</small></div></header>
+            <div class="comparison-bar" aria-label="25% recipient and 75% protocol">
+              <span class="bar-recipient" style="--share: 25"><b>Recipient 25%</b></span>
+              <span class="bar-protocol" style="--share: 75"><b>Protocol 75%</b></span>
+            </div>
+            <dl>
+              <div><dt>Recipient</dt><dd data-compare="defaultRecipient">$2,500</dd></div>
+              <div><dt>HYPE route</dt><dd data-compare="defaultHype">$3,750</dd></div>
+              <div><dt>KNTQ route</dt><dd data-compare="defaultKntq">$3,750</dd></div>
+            </dl>
+          </article>
+          <article class="comparison-row">
+            <header><span>02</span><div><strong>Approved creator</strong><small>50% recipient share</small></div></header>
+            <div class="comparison-bar" aria-label="50% recipient and 50% protocol">
+              <span class="bar-recipient" style="--share: 50"><b>Recipient 50%</b></span>
+              <span class="bar-protocol" style="--share: 50"><b>Protocol 50%</b></span>
+            </div>
+            <dl>
+              <div><dt>Recipient</dt><dd data-compare="approvedRecipient">$5,000</dd></div>
+              <div><dt>HYPE route</dt><dd data-compare="approvedHype">$2,500</dd></div>
+              <div><dt>KNTQ route</dt><dd data-compare="approvedKntq">$2,500</dd></div>
+            </dl>
+          </article>
+        </div>
+      </section>
+
+      <section class="nft-section page-grid" aria-labelledby="nft-title">
+        <div class="section-number">03</div>
+        <div class="nft-copy">
+          <p class="eyebrow">The NFT lens</p>
+          <h2 id="nft-title">A bigger slice.<br /><em>Not</em> a bigger pool.</h2>
+          <p>
+            An eligible Ascend NFT changes a holder’s weighting inside the direct HYPE reward pool.
+            It does not enlarge that pool and does not boost ecosystem-token distributions.
+          </p>
+          <a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer">
+            Verify in the Ascend NFT docs <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+
+        <div class="nft-instrument">
+          <div class="instrument-topline">
+            <span>DIRECT HYPE REWARD POOL</span>
+            <span data-value="hypeRewards">$375</span>
+          </div>
+          <div class="pool-visual" aria-hidden="true">
+            <span class="pool-base"></span>
+            <span class="pool-slice"></span>
+            <div class="pool-label">Fixed pool<br /><strong>100%</strong></div>
+          </div>
+          <div class="known-unknown-grid">
+            <div>
+              <span class="signal known">Known</span>
+              <strong>Reward weighting increases</strong>
+              <p>Requires an eligible HYPE staking position.</p>
+            </div>
+            <div>
+              <span class="signal unknown">Undisclosed</span>
+              <strong>Exact boost rates</strong>
+              <p>Tier quantities and eligibility thresholds are not final.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="share-section" aria-labelledby="share-title">
+        <div class="share-inner page-grid">
+          <div class="section-number">04</div>
+          <div class="share-copy">
+            <p class="eyebrow">Take the model with you</p>
+            <h2 id="share-title">Make the flow<br />easy to share.</h2>
+            <p>Export the current scenario as a 1200×630 image or copy a sourced text snapshot.</p>
+            <div class="share-actions">
+              <button class="primary-action dark" id="downloadCard" type="button">Download X card <span aria-hidden="true">↓</span></button>
+              <button class="secondary-action dark-outline" id="copySnapshot" type="button">Copy snapshot</button>
+            </div>
+            <p class="copy-status" id="copyStatus" aria-live="polite"></p>
+          </div>
+          <div class="share-card" id="shareCard" aria-label="Share card preview">
+            <div class="share-card-top"><span>ASCEND FLOW LAB</span><span id="cardPeriod">DAILY MODEL</span></div>
+            <p>Every <strong data-card="volume">$1M</strong> in token volume routes:</p>
+            <div class="share-card-main">
+              <div><small>RECIPIENT</small><strong data-card="recipient">$2.5K</strong></div>
+              <span aria-hidden="true">→</span>
+              <div><small>HYPE</small><strong data-card="hype">$3.75K</strong></div>
+              <span aria-hidden="true">+</span>
+              <div><small>KNTQ</small><strong data-card="kntq">$3.75K</strong></div>
+            </div>
+            <div class="share-card-bottom"><span id="cardScenario">DEFAULT DEPLOYER · 25%</span><span>UNOFFICIAL · PROPOSED MODEL</span></div>
+          </div>
+          <canvas id="shareCanvas" width="1200" height="630" hidden></canvas>
+        </div>
+      </section>
+
+      <section class="sources-section page-grid" id="sources" aria-labelledby="sources-title">
+        <div class="section-number">05</div>
+        <div class="sources-copy">
+          <p class="eyebrow">Source ledger</p>
+          <h2 id="sources-title">Every rule,<br />traceable.</h2>
+          <p>
+            This tool models the published proposal. It is not affiliated with Ascend, Kinetiq or Elysium,
+            and it is not a forecast, audit, investment recommendation or statement of final protocol behavior.
+          </p>
+        </div>
+        <ol class="source-list">
+          <li><span>01</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
+          <li><span>02</span><a href="https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation" target="_blank" rel="noreferrer"><strong>Revenue &amp; Capital Allocation</strong><small>HYPE and KNTQ routing</small></a></li>
+          <li><span>03</span><a href="https://ascendlaunch.gitbook.io/docs/hype-staking" target="_blank" rel="noreferrer"><strong>HYPE Staking</strong><small>Reward sources and constraints</small></a></li>
+          <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer"><strong>Ascend NFTs</strong><small>Weighting, tiers and mint access</small></a></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wordmark"><span class="wordmark-mark" aria-hidden="true">A↗</span><span>Ascend Flow Lab</span></div>
+      <p>Built as an independent community field guide for Elysium.</p>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+  </body>
+</html>
