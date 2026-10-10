@@ -15,6 +15,18 @@ const state = {
   dailyVolume: 1_000_000,
   recipient: "deployer",
   period: "day",
+  address: "",
+};
+
+const RPC_URL = "https://testnet-rpc.elysium.kinetiq.xyz";
+const EXPLORER_URL = "https://elysium.kinetiq.xyz/testnet-explorer";
+const networkState = {
+  block: null,
+  gasGwei: null,
+  latency: null,
+  updatedAt: null,
+  samples: [],
+  addressProof: null,
 };
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -89,6 +101,7 @@ function updateUrl() {
   params.set("v", String(Math.round(state.dailyVolume)));
   params.set("role", state.recipient);
   params.set("period", state.period);
+  if (state.address) params.set("address", state.address);
   history.replaceState(null, "", `${location.pathname}?${params.toString()}${location.hash}`);
 }
 
@@ -229,7 +242,7 @@ function drawShareCard() {
   const width = canvas.width;
   const height = canvas.height;
 
-  ctx.fillStyle = "#efede5";
+  ctx.fillStyle = "#f6e8ef";
   ctx.fillRect(0, 0, width, height);
 
   ctx.strokeStyle = "rgba(18,18,16,.12)";
@@ -241,12 +254,12 @@ function drawShareCard() {
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
   }
 
-  ctx.fillStyle = "#121210";
+  ctx.fillStyle = "#0b0c10";
   ctx.fillRect(0, 0, 24, height);
-  ctx.fillStyle = "#f05a2b";
+  ctx.fillStyle = "#feaa8d";
   ctx.fillRect(24, 0, 8, height);
 
-  ctx.fillStyle = "#121210";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 22px Arial";
   ctx.fillText("ASCEND FLOW LAB", 72, 72);
   ctx.textAlign = "right";
@@ -256,40 +269,40 @@ function drawShareCard() {
 
   ctx.font = "44px Georgia";
   ctx.fillText("Every", 72, 172);
-  ctx.fillStyle = "#2354d8";
+  ctx.fillStyle = "#8b61d7";
   ctx.font = "italic 74px Georgia";
   ctx.fillText(formatMoney(values.volume, true), 188, 174);
-  ctx.fillStyle = "#121210";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "44px Georgia";
   ctx.fillText("in token volume routes:", 72, 232);
 
   const boxes = [
-    { x: 72, label: "RECIPIENT", value: values.recipient, color: "#f05a2b" },
-    { x: 442, label: "HYPE PURCHASES", value: values.hype, color: "#2354d8" },
-    { x: 812, label: "KNTQ PURCHASES", value: values.kntq, color: "#121210" },
+    { x: 72, label: "RECIPIENT", value: values.recipient, color: "#feaa8d" },
+    { x: 442, label: "HYPE PURCHASES", value: values.hype, color: "#8b61d7" },
+    { x: 812, label: "KNTQ PURCHASES", value: values.kntq, color: "#ee84b5" },
   ];
   boxes.forEach((box) => {
-    ctx.strokeStyle = "#121210";
+    ctx.strokeStyle = "#0b0c10";
     ctx.strokeRect(box.x, 292, 316, 160);
     ctx.fillStyle = box.color;
     ctx.fillRect(box.x, 292, 316, 12);
-    ctx.fillStyle = "#67645d";
+    ctx.fillStyle = "#6f5d68";
     ctx.font = "700 15px monospace";
     ctx.fillText(box.label, box.x + 20, 346);
-    ctx.fillStyle = "#121210";
+    ctx.fillStyle = "#0b0c10";
     ctx.font = "700 44px monospace";
     ctx.fillText(formatMoney(box.value, true), box.x + 20, 414);
   });
 
-  ctx.fillStyle = "#121210";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 16px monospace";
   ctx.fillText(`${recipient.label.toUpperCase()} · ${recipient.rate * 100}% RECIPIENT SHARE`, 72, 520);
-  ctx.fillStyle = "#67645d";
+  ctx.fillStyle = "#6f5d68";
   ctx.font = "15px Arial";
   ctx.fillText("Proposed model · illustrative USD equivalents · ascendlaunch.gitbook.io/docs", 72, 566);
-  ctx.fillStyle = "#d6ff43";
+  ctx.fillStyle = "#ee84b5";
   ctx.fillRect(width - 210, height - 82, 138, 34);
-  ctx.fillStyle = "#121210";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 14px monospace";
   ctx.fillText("FOLLOW THE FEE", width - 195, height - 60);
 
@@ -306,30 +319,291 @@ $("#downloadCard").addEventListener("click", () => {
   window.setTimeout(() => { copyStatus.textContent = ""; }, 3000);
 });
 
+async function rpcBatch(calls) {
+  const startedAt = performance.now();
+  const response = await fetch(RPC_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(calls.map((call, index) => ({
+      jsonrpc: "2.0",
+      method: call.method,
+      params: call.params || [],
+      id: index + 1,
+    }))),
+  });
+  if (!response.ok) throw new Error(`RPC returned HTTP ${response.status}`);
+  const payload = await response.json();
+  if (!Array.isArray(payload)) throw new Error("Unexpected RPC payload");
+  const ordered = calls.map((_, index) => payload.find((item) => item.id === index + 1));
+  if (ordered.some((item) => !item || item.error)) throw new Error("RPC method failed");
+  return { results: ordered.map((item) => item.result), latency: Math.round(performance.now() - startedAt) };
+}
+
+function drawBlockTrace() {
+  const samples = networkState.samples;
+  const path = $("#blockTracePath");
+  if (!samples.length) {
+    path.setAttribute("d", "");
+    return;
+  }
+  const min = Math.min(...samples);
+  const max = Math.max(...samples);
+  const range = Math.max(max - min, 1);
+  const points = samples.map((sample, index) => {
+    const x = samples.length === 1 ? 360 : (index / (samples.length - 1)) * 720;
+    const y = 84 - ((sample - min) / range) * 68;
+    return `${index ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+  });
+  if (samples.length === 1) points.push("L720 84");
+  path.setAttribute("d", points.join(" "));
+  $("#traceWindow").textContent = samples.length > 1
+    ? `${samples.length} samples · +${(max - min).toLocaleString("en-US")} blocks`
+    : "first sample captured";
+}
+
+function formatGwei(hexValue) {
+  const wei = BigInt(hexValue || "0x0");
+  const integer = wei / 1_000_000_000n;
+  const decimal = ((wei % 1_000_000_000n) / 1_000_000n).toString().padStart(3, "0");
+  return `${integer.toLocaleString("en-US")}.${decimal}`;
+}
+
+function formatHype(hexValue) {
+  const wei = BigInt(hexValue || "0x0");
+  const unit = 1_000_000_000_000_000_000n;
+  const integer = wei / unit;
+  const decimal = ((wei % unit) / 100_000_000_000_000n).toString().padStart(4, "0");
+  return `${integer.toLocaleString("en-US")}.${decimal} HYPE`;
+}
+
 async function refreshNetworkPulse() {
-  const dot = $("#networkDot");
-  const status = $("#blockStatus");
+  const dots = [$("#networkDot"), $("#consoleNetworkDot")];
+  const refreshButton = $("#refreshNetwork");
+  refreshButton.disabled = true;
   try {
-    const response = await fetch("https://testnet-rpc.elysium.kinetiq.xyz", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify([
-        { jsonrpc: "2.0", method: "eth_chainId", params: [], id: 1 },
-        { jsonrpc: "2.0", method: "eth_blockNumber", params: [], id: 2 },
-      ]),
-    });
-    if (!response.ok) throw new Error("RPC response failed");
-    const payload = await response.json();
-    const chain = payload.find((item) => item.id === 1)?.result;
-    const block = payload.find((item) => item.id === 2)?.result;
-    if (Number.parseInt(chain, 16) !== 99801 || !block) throw new Error("Unexpected chain");
-    dot.classList.add("live");
-    status.textContent = `Block ${Number.parseInt(block, 16).toLocaleString("en-US")} · live`;
-  } catch {
-    dot.classList.remove("live");
-    status.textContent = "Public RPC unavailable";
+    const { results, latency } = await rpcBatch([
+      { method: "eth_chainId" },
+      { method: "eth_blockNumber" },
+      { method: "eth_gasPrice" },
+      { method: "eth_getBlockByNumber", params: ["latest", false] },
+    ]);
+    const [chainHex, blockHex, gasHex, latestBlock] = results;
+    const chainId = Number.parseInt(chainHex, 16);
+    const block = Number.parseInt(blockHex, 16);
+    if (chainId !== 99801 || !Number.isFinite(block)) throw new Error("Unexpected chain identity");
+
+    networkState.block = block;
+    networkState.gasGwei = formatGwei(gasHex);
+    networkState.latency = latency;
+    networkState.updatedAt = new Date();
+    networkState.samples.push(block);
+    networkState.samples = networkState.samples.slice(-28);
+
+    dots.forEach((dot) => dot.classList.add("live"));
+    $("#blockStatus").textContent = `Block ${block.toLocaleString("en-US")} · live`;
+    $("#gasStatus").textContent = `Gas ${networkState.gasGwei} gwei`;
+    $("#consoleNetworkState").textContent = "Verified Elysium handshake";
+    $("#latestBlock").textContent = `#${block.toLocaleString("en-US")}`;
+    $("#rpcLatency").textContent = `${latency} ms`;
+    $("#gasPrice").textContent = networkState.gasGwei;
+    $("#blockTransactions").textContent = String(latestBlock?.transactions?.length ?? 0);
+    drawBlockTrace();
+  } catch (error) {
+    dots.forEach((dot) => dot.classList.remove("live"));
+    $("#blockStatus").textContent = "Public RPC unavailable";
+    $("#gasStatus").textContent = "Gas —";
+    $("#consoleNetworkState").textContent = "Handshake unavailable";
+    $("#rpcLatency").textContent = "—";
+  } finally {
+    refreshButton.disabled = false;
   }
 }
+
+function classifyAddress(code, balanceHex, nonceHex) {
+  const hasCode = typeof code === "string" && !/^0x0*$/i.test(code);
+  const balance = BigInt(balanceHex || "0x0");
+  const nonce = Number.parseInt(nonceHex || "0x0", 16);
+  if (hasCode) return { verdict: "Contract bytecode found", mark: "✓", tone: "contract" };
+  if (balance > 0n || nonce > 0) return { verdict: "Active account · no code", mark: "↗", tone: "wallet" };
+  return { verdict: "No deployed code found", mark: "—", tone: "empty" };
+}
+
+async function inspectAddress(rawAddress) {
+  const address = rawAddress.trim();
+  const status = $("#probeStatus");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    status.textContent = "Enter a complete 42-character EVM address.";
+    $("#addressInput").setAttribute("aria-invalid", "true");
+    return;
+  }
+
+  $("#addressInput").removeAttribute("aria-invalid");
+  status.textContent = "Reading Elysium testnet…";
+  try {
+    const { results } = await rpcBatch([
+      { method: "eth_getCode", params: [address, "latest"] },
+      { method: "eth_getBalance", params: [address, "latest"] },
+      { method: "eth_getTransactionCount", params: [address, "latest"] },
+    ]);
+    const [code, balanceHex, nonceHex] = results;
+    const classification = classifyAddress(code, balanceHex, nonceHex);
+    const byteCount = Math.max(0, (code.length - 2) / 2);
+    const balance = formatHype(balanceHex);
+    const nonce = Number.parseInt(nonceHex, 16);
+
+    state.address = address;
+    networkState.addressProof = { address, byteCount, balance, nonce, ...classification };
+    $("#probeEmpty").hidden = true;
+    $("#probeResult").hidden = false;
+    $("#verdictMark").textContent = classification.mark;
+    $("#verdictMark").dataset.tone = classification.tone;
+    $("#addressVerdict").textContent = classification.verdict;
+    $("#resultAddress").textContent = `${address.slice(0, 8)}…${address.slice(-6)}`;
+    $("#resultAddress").title = address;
+    $("#resultBytecode").textContent = byteCount ? `${byteCount.toLocaleString("en-US")} bytes` : "None";
+    $("#resultBalance").textContent = balance;
+    $("#resultNonce").textContent = nonce.toLocaleString("en-US");
+    $("#explorerLink").href = `${EXPLORER_URL}/address/${address}`;
+    status.textContent = `Verified against block ${networkState.block ? `#${networkState.block.toLocaleString("en-US")}` : "latest"}.`;
+    updateUrl();
+  } catch {
+    status.textContent = "The public RPC did not return an address result. Try again.";
+  }
+}
+
+$("#refreshNetwork").addEventListener("click", refreshNetworkPulse);
+
+$("#addressProbeForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  inspectAddress($("#addressInput").value);
+});
+
+function drawBuildProofCard() {
+  const proof = networkState.addressProof;
+  if (!proof) return null;
+  const canvas = $("#shareCanvas");
+  const ctx = canvas.getContext("2d");
+  const { width, height } = canvas;
+
+  ctx.fillStyle = "#0b0c10";
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = "#342833";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= width; x += 32) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+  }
+  for (let y = 0; y <= height; y += 32) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+  }
+
+  const sideGradient = ctx.createLinearGradient(0, 0, 190, height);
+  sideGradient.addColorStop(0, "#8b61d7");
+  sideGradient.addColorStop(0.34, "#bc76d8");
+  sideGradient.addColorStop(0.58, "#ee84b5");
+  sideGradient.addColorStop(0.78, "#fb9b9e");
+  sideGradient.addColorStop(1, "#fed6af");
+  ctx.fillStyle = sideGradient;
+  ctx.fillRect(0, 0, 190, height);
+  ctx.save();
+  ctx.translate(76, height - 54);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = "#0b0c10";
+  ctx.font = "700 18px monospace";
+  ctx.fillText("ELYSIUM TESTNET · CHAIN 99801 · READ ONLY", 0, 0);
+  ctx.restore();
+
+  ctx.fillStyle = "#fff8fb";
+  ctx.font = "700 19px Arial";
+  ctx.fillText("ASCEND FLOW LAB / BUILD PROOF", 238, 60);
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#fb9b9e";
+  ctx.font = "700 16px monospace";
+  ctx.fillText("● LIVE RPC OBSERVATION", width - 58, 60);
+  ctx.textAlign = "left";
+
+  ctx.fillStyle = "#fff8fb";
+  ctx.font = "76px Georgia";
+  ctx.fillText("Build", 238, 162);
+  ctx.fillStyle = "#fed6af";
+  ctx.font = "italic 92px Georgia";
+  ctx.fillText("proof.", 414, 162);
+
+  ctx.strokeStyle = "#6f5d68";
+  ctx.strokeRect(238, 208, width - 296, 104);
+  ctx.fillStyle = "#bba8b3";
+  ctx.font = "700 14px monospace";
+  ctx.fillText("VERIFIED ADDRESS", 262, 242);
+  ctx.fillStyle = "#fff8fb";
+  ctx.font = "700 24px monospace";
+  ctx.fillText(proof.address, 262, 286);
+
+  const stats = [
+    ["NETWORK VERDICT", proof.verdict],
+    ["OBSERVED BLOCK", networkState.block ? `#${networkState.block.toLocaleString("en-US")}` : "LATEST"],
+    ["BYTECODE", proof.byteCount ? `${proof.byteCount.toLocaleString("en-US")} BYTES` : "NONE"],
+  ];
+  const boxWidth = (width - 296) / 3;
+  stats.forEach(([label, value], index) => {
+    const x = 238 + boxWidth * index;
+    ctx.strokeStyle = "#6f5d68";
+    ctx.strokeRect(x, 344, boxWidth, 142);
+    ctx.fillStyle = index === 0 ? "#feaa8d" : index === 1 ? "#8b61d7" : "#ee84b5";
+    ctx.fillRect(x, 344, boxWidth, 9);
+    ctx.fillStyle = "#bba8b3";
+    ctx.font = "700 13px monospace";
+    ctx.fillText(label, x + 22, 390);
+    ctx.fillStyle = "#fff8fb";
+    ctx.font = index === 0 ? "700 22px Arial" : "700 29px monospace";
+    const clipped = value.length > 25 ? `${value.slice(0, 23)}…` : value;
+    ctx.fillText(clipped, x + 22, 446);
+  });
+
+  ctx.fillStyle = "#bba8b3";
+  ctx.font = "15px Arial";
+  ctx.fillText("Direct public-RPC observation · no wallet connection · no signature · unofficial community tool", 238, 548);
+  ctx.fillStyle = "#fff8fb";
+  ctx.font = "700 14px monospace";
+  ctx.fillText(`GAS ${networkState.gasGwei || "—"} GWEI`, 238, 586);
+  ctx.textAlign = "right";
+  ctx.fillText(new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC", width - 58, 586);
+  ctx.textAlign = "left";
+
+  return canvas;
+}
+
+$("#downloadProof").addEventListener("click", () => {
+  const canvas = drawBuildProofCard();
+  if (!canvas) return;
+  const link = document.createElement("a");
+  link.download = `elysium-build-proof-${networkState.addressProof.address.slice(0, 8)}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  $("#probeStatus").textContent = "1200×630 build-proof card downloaded.";
+});
+
+$("#copyProof").addEventListener("click", async () => {
+  const proof = networkState.addressProof;
+  if (!proof) return;
+  const text = [
+    "Elysium Build Proof — Ascend Flow Lab",
+    `Network: Elysium testnet (chain 99801)`,
+    `Observed block: ${networkState.block ? `#${networkState.block}` : "latest"}`,
+    `Address: ${proof.address}`,
+    `Verdict: ${proof.verdict}`,
+    `Bytecode: ${proof.byteCount.toLocaleString("en-US")} bytes`,
+    `Balance: ${proof.balance}`,
+    `Nonce: ${proof.nonce}`,
+    `Verified: ${new Date().toISOString()}`,
+    "Read-only RPC observation. Unofficial community tool.",
+    location.href,
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+    $("#probeStatus").textContent = "Build proof copied.";
+  } catch {
+    $("#probeStatus").textContent = "Clipboard access was unavailable.";
+  }
+});
 
 function hydrateFromUrl() {
   const params = new URLSearchParams(location.search);
@@ -337,10 +611,15 @@ function hydrateFromUrl() {
   const volume = hasVolume ? Number(params.get("v")) : Number.NaN;
   const recipient = params.get("role");
   const period = params.get("period");
+  const address = params.get("address") || "";
 
   if (Number.isFinite(volume) && volume >= 0) state.dailyVolume = clamp(volume, 0, 1_000_000_000);
   if (recipient in MODEL.recipients) state.recipient = recipient;
   if (period in MODEL.periods) state.period = period;
+  if (/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    state.address = address;
+    $("#addressInput").value = address;
+  }
 
   $(`input[name="recipient"][value="${state.recipient}"]`).checked = true;
   $(`input[name="period"][value="${state.period}"]`).checked = true;
@@ -349,4 +628,5 @@ function hydrateFromUrl() {
 hydrateFromUrl();
 render();
 refreshNetworkPulse();
-window.setInterval(refreshNetworkPulse, 20_000);
+if (state.address) inspectAddress(state.address);
+window.setInterval(refreshNetworkPulse, 15_000);

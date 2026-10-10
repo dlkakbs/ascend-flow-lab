@@ -7,10 +7,11 @@
       name="description"
       content="Ascend Flow Lab is an unofficial interactive explorer for Ascend's proposed fee and capital allocation model on Elysium."
     />
-    <meta name="theme-color" content="#efede5" />
+    <meta name="theme-color" content="#f6e8ef" />
     <meta property="og:title" content="Ascend Flow Lab" />
-    <meta property="og:description" content="Follow every dollar through Ascend's proposed economic model." />
-    <title>Ascend Flow Lab — Follow every dollar</title>
+    <meta property="og:description" content="Read Elysium live. Follow every dollar through Ascend's proposed economic model." />
+    <title>Ascend Flow Lab — Live Elysium proof and protocol economics</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
   </head>
@@ -24,6 +25,7 @@
       </a>
       <div class="header-meta">
         <span class="status-pill">Unofficial community tool</span>
+        <a href="#proof">Live proof</a>
         <a href="#sources">Sources</a>
         <button class="text-button" id="resetButton" type="button">Reset model</button>
       </div>
@@ -37,14 +39,14 @@
         </div>
 
         <div class="hero-copy">
-          <p class="eyebrow">Ascend economics, made legible</p>
+          <p class="eyebrow">Live Elysium proof × Ascend economics</p>
           <h1 id="hero-title">Follow<br /><em>every</em> dollar.</h1>
           <p class="hero-lede">
-            Turn trading activity into a traceable map of creator payouts, HYPE purchases,
-            ecosystem support, KNTQ burns and staker rewards.
+            Read the Elysium testnet directly, inspect any address, then turn trading activity
+            into a traceable map of creator payouts, HYPE purchases and ecosystem support.
           </p>
           <div class="hero-actions">
-            <a class="primary-action" href="#model">Open the flow model <span aria-hidden="true">↓</span></a>
+            <a class="primary-action" href="#proof">Verify the chain <span aria-hidden="true">↓</span></a>
             <a class="secondary-action" href="https://ascendlaunch.gitbook.io/docs" target="_blank" rel="noreferrer">
               Read the litepaper <span aria-hidden="true">↗</span>
             </a>
@@ -54,7 +56,7 @@
         <aside class="hero-ledger" aria-label="Model facts">
           <div class="ledger-heading">
             <span>MODEL BASIS</span>
-            <span>SEP 2026</span>
+            <span>OCT 2026</span>
           </div>
           <dl>
             <div>
@@ -82,12 +84,126 @@
           <span>Elysium testnet</span>
           <span>Chain 99801</span>
           <span id="blockStatus">Checking network…</span>
+          <span id="gasStatus">Gas —</span>
+        </div>
+      </section>
+
+      <section class="proof-section" id="proof" aria-labelledby="proof-title">
+        <div class="section-heading page-grid proof-heading">
+          <div class="section-number">01</div>
+          <div>
+            <p class="eyebrow">Elysium testnet telemetry</p>
+            <h2 id="proof-title">Live network<br />data.</h2>
+          </div>
+          <p class="section-intro">
+            Every value in this panel is requested from Elysium’s public testnet RPC in your browser.
+            No wallet connection, signature or transaction is required. This read-only tool does not
+            create onchain activity.
+          </p>
+        </div>
+
+        <div class="proof-console page-grid">
+          <div class="proof-sidebar">
+            <div class="proof-seal" aria-hidden="true">
+              <span>RPC</span>
+              <strong>99801</strong>
+              <small>ELYSIUM / TESTNET</small>
+            </div>
+            <div class="proof-legend">
+              <p><span class="legend-dot live"></span><strong>Live</strong> — returned by the network</p>
+              <p><span class="legend-dot fixed"></span><strong>Fixed</strong> — official chain configuration</p>
+              <p><span class="legend-dot local"></span><strong>Local</strong> — calculated in this browser</p>
+            </div>
+          </div>
+
+          <div class="telemetry-panel">
+            <div class="telemetry-topline">
+              <div>
+                <span class="pulse-dot" id="consoleNetworkDot" aria-hidden="true"></span>
+                <strong id="consoleNetworkState">Establishing handshake</strong>
+              </div>
+              <button type="button" class="mini-action" id="refreshNetwork">Refresh ↻</button>
+            </div>
+
+            <div class="telemetry-grid" aria-live="polite">
+              <div class="telemetry-stat featured">
+                <span>Latest block</span>
+                <strong id="latestBlock">—</strong>
+                <small>live / eth_blockNumber</small>
+              </div>
+              <div class="telemetry-stat">
+                <span>RPC latency</span>
+                <strong id="rpcLatency">—</strong>
+                <small>local round trip</small>
+              </div>
+              <div class="telemetry-stat">
+                <span>Gas price</span>
+                <strong id="gasPrice">—</strong>
+                <small>live / gwei</small>
+              </div>
+              <div class="telemetry-stat">
+                <span>Block txs</span>
+                <strong id="blockTransactions">—</strong>
+                <small>latest block</small>
+              </div>
+            </div>
+
+            <div class="block-trace">
+              <div class="trace-label"><span>Observed block progression</span><small id="traceWindow">waiting for samples</small></div>
+              <svg id="blockSparkline" viewBox="0 0 720 100" role="img" aria-label="Recent observed Elysium block progression">
+                <path class="trace-grid" d="M0 25H720M0 50H720M0 75H720"></path>
+                <path class="trace-line" id="blockTracePath" d=""></path>
+              </svg>
+            </div>
+          </div>
+
+          <div class="address-probe">
+            <div class="probe-heading">
+              <div>
+                <p class="micro-label">ADDRESS PROBE</p>
+                <h3>Is it deployed on Elysium?</h3>
+              </div>
+              <span class="read-only-badge">READ ONLY</span>
+            </div>
+            <form id="addressProbeForm" novalidate>
+              <label for="addressInput">Contract or wallet address</label>
+              <div class="probe-input-row">
+                <input id="addressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x…" aria-describedby="addressHelp" />
+                <button type="submit">Inspect →</button>
+              </div>
+              <p id="addressHelp">Queries code, balance and nonce from testnet. Nothing is signed.</p>
+            </form>
+
+            <div class="probe-empty" id="probeEmpty">
+              <span>↳</span>
+              <p>Paste an Elysium testnet address to create a verifiable builder snapshot.</p>
+            </div>
+
+            <div class="probe-result" id="probeResult" hidden>
+              <div class="result-verdict">
+                <span class="verdict-mark" id="verdictMark">✓</span>
+                <div><small>NETWORK VERDICT</small><strong id="addressVerdict">Contract detected</strong></div>
+              </div>
+              <dl>
+                <div><dt>Address</dt><dd id="resultAddress">—</dd></div>
+                <div><dt>Bytecode</dt><dd id="resultBytecode">—</dd></div>
+                <div><dt>HYPE balance</dt><dd id="resultBalance">—</dd></div>
+                <div><dt>Nonce</dt><dd id="resultNonce">—</dd></div>
+              </dl>
+              <div class="probe-actions">
+                <button class="primary-action" id="copyProof" type="button">Copy build proof</button>
+                <button class="secondary-action" id="downloadProof" type="button">Download card ↓</button>
+                <a class="secondary-action explorer-action" id="explorerLink" href="https://elysium.kinetiq.xyz/testnet-explorer" target="_blank" rel="noreferrer">Open explorer ↗</a>
+              </div>
+            </div>
+            <p class="probe-status" id="probeStatus" aria-live="polite"></p>
+          </div>
         </div>
       </section>
 
       <section class="model-section" id="model" aria-labelledby="model-title">
         <div class="section-heading page-grid">
-          <div class="section-number">01</div>
+          <div class="section-number">02</div>
           <div>
             <p class="eyebrow">Interactive model</p>
             <h2 id="model-title">One input.<br />The whole system.</h2>
@@ -308,7 +424,7 @@
 
       <section class="comparison-section" aria-labelledby="comparison-title">
         <div class="page-grid section-heading compact">
-          <div class="section-number">02</div>
+          <div class="section-number">03</div>
           <div>
             <p class="eyebrow">Scenario comparison</p>
             <h2 id="comparison-title">Same activity.<br />Different routing.</h2>
@@ -351,13 +467,14 @@
       </section>
 
       <section class="nft-section page-grid" aria-labelledby="nft-title">
-        <div class="section-number">03</div>
+        <div class="section-number">04</div>
         <div class="nft-copy">
-          <p class="eyebrow">The NFT lens</p>
-          <h2 id="nft-title">A bigger slice.<br /><em>Not</em> a bigger pool.</h2>
+          <p class="eyebrow">Ascend NFT mechanics</p>
+          <h2 id="nft-title">NFT reward<br />weighting.</h2>
           <p>
-            An eligible Ascend NFT changes a holder’s weighting inside the direct HYPE reward pool.
-            It does not enlarge that pool and does not boost ecosystem-token distributions.
+            Ascend’s docs place the NFT benefit inside the direct HYPE staker reward pool.
+            Eligible NFT holders receive a higher weight when that fixed pool is distributed.
+            Exact tier boosts and eligibility thresholds are not final.
           </p>
           <a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer">
             Verify in the Ascend NFT docs <span aria-hidden="true">↗</span>
@@ -391,7 +508,7 @@
 
       <section class="share-section" aria-labelledby="share-title">
         <div class="share-inner page-grid">
-          <div class="section-number">04</div>
+          <div class="section-number">05</div>
           <div class="share-copy">
             <p class="eyebrow">Take the model with you</p>
             <h2 id="share-title">Make the flow<br />easy to share.</h2>
@@ -419,7 +536,7 @@
       </section>
 
       <section class="sources-section page-grid" id="sources" aria-labelledby="sources-title">
-        <div class="section-number">05</div>
+        <div class="section-number">06</div>
         <div class="sources-copy">
           <p class="eyebrow">Source ledger</p>
           <h2 id="sources-title">Every rule,<br />traceable.</h2>
@@ -429,10 +546,12 @@
           </p>
         </div>
         <ol class="source-list">
-          <li><span>01</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
-          <li><span>02</span><a href="https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation" target="_blank" rel="noreferrer"><strong>Revenue &amp; Capital Allocation</strong><small>HYPE and KNTQ routing</small></a></li>
-          <li><span>03</span><a href="https://ascendlaunch.gitbook.io/docs/hype-staking" target="_blank" rel="noreferrer"><strong>HYPE Staking</strong><small>Reward sources and constraints</small></a></li>
-          <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer"><strong>Ascend NFTs</strong><small>Weighting, tiers and mint access</small></a></li>
+          <li><span>01</span><a href="https://elysium.kinetiq.xyz/docs/building-on-elysium" target="_blank" rel="noreferrer"><strong>Building on Elysium</strong><small>RPC, chain ID and HYPE gas configuration</small></a></li>
+          <li><span>02</span><a href="https://elysium.kinetiq.xyz/docs/chain-specifications" target="_blank" rel="noreferrer"><strong>Chain Specifications</strong><small>Official rollup and network parameters</small></a></li>
+          <li><span>03</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
+          <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation" target="_blank" rel="noreferrer"><strong>Revenue &amp; Capital Allocation</strong><small>HYPE and KNTQ routing</small></a></li>
+          <li><span>05</span><a href="https://ascendlaunch.gitbook.io/docs/hype-staking" target="_blank" rel="noreferrer"><strong>HYPE Staking</strong><small>Reward sources and constraints</small></a></li>
+          <li><span>06</span><a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer"><strong>Ascend NFTs</strong><small>Weighting, tiers and mint access</small></a></li>
         </ol>
       </section>
     </main>
