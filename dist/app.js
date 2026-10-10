@@ -16,10 +16,12 @@ const state = {
   recipient: "deployer",
   period: "day",
   address: "",
+  module: "pulse",
 };
 
 const RPC_URL = "https://testnet-rpc.elysium.kinetiq.xyz";
 const EXPLORER_URL = "https://elysium.kinetiq.xyz/testnet-explorer";
+const EXPLORER_API = "https://testnet-api.elysium.kinetiq.xyz/api/v2";
 const networkState = {
   block: null,
   gasGwei: null,
@@ -27,10 +29,59 @@ const networkState = {
   updatedAt: null,
   samples: [],
   addressSnapshot: null,
+  explorerMeta: null,
 };
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
+
+const MODULES = new Set(["pulse", "radar", "inspect", "builder", "lens", "atlas", "model", "roadmap"]);
+
+function setActiveModule(moduleName, { focus = false, scroll = false } = {}) {
+  const nextModule = MODULES.has(moduleName) ? moduleName : "pulse";
+  state.module = nextModule;
+
+  $$('[data-module-section]').forEach((section) => {
+    section.hidden = section.dataset.moduleSection !== nextModule;
+  });
+
+  $$('[data-module-tab]').forEach((tab) => {
+    const selected = tab.dataset.moduleTab === nextModule;
+    tab.setAttribute("aria-selected", String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    if (selected && focus) tab.focus();
+  });
+
+  updateUrl();
+  if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$$('[data-module-tab]').forEach((tab) => {
+  tab.addEventListener("click", () => setActiveModule(tab.dataset.moduleTab, { scroll: true }));
+  tab.addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const tabs = $$('[data-module-tab]');
+    const current = tabs.indexOf(tab);
+    const next = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? tabs.length - 1
+        : (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    setActiveModule(tabs[next].dataset.moduleTab, { focus: true, scroll: true });
+  });
+});
+
+$$('[data-open-module]').forEach((control) => {
+  control.addEventListener("click", (event) => {
+    if (control.tagName === "A") event.preventDefault();
+    const targetId = control.dataset.scrollTarget;
+    setActiveModule(control.dataset.openModule, { scroll: !targetId });
+    if (targetId) {
+      window.requestAnimationFrame(() => document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth" }));
+    }
+  });
+});
 
 const volumeInput = $("#volumeInput");
 const volumeRange = $("#volumeRange");
@@ -98,6 +149,7 @@ function setText(selector, value) {
 
 function updateUrl() {
   const params = new URLSearchParams();
+  params.set("module", state.module);
   params.set("v", String(Math.round(state.dailyVolume)));
   params.set("role", state.recipient);
   params.set("period", state.period);
@@ -327,6 +379,7 @@ async function rpcBatch(calls) {
   const response = await fetch(RPC_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
+    signal: AbortSignal.timeout(12_000),
     body: JSON.stringify(calls.map((call, index) => ({
       jsonrpc: "2.0",
       method: call.method,
@@ -377,6 +430,122 @@ function formatHype(hexValue) {
   const integer = wei / unit;
   const decimal = ((wei % unit) / 100_000_000_000_000n).toString().padStart(4, "0");
   return `${integer.toLocaleString("en-US")}.${decimal} HYPE`;
+}
+
+function formatInteger(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed.toLocaleString("en-US") : "—";
+}
+
+function formatUsdMetric(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "Unavailable";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    notation: parsed >= 100_000 ? "compact" : "standard",
+    maximumFractionDigits: parsed < 100 ? 2 : 1,
+  }).format(parsed);
+}
+
+function shortAddress(address, head = 8, tail = 6) {
+  return typeof address === "string" && address.length > head + tail
+    ? `${address.slice(0, head)}…${address.slice(-tail)}`
+    : address || "—";
+}
+
+function formatUtc(timestamp) {
+  if (!timestamp) return "—";
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "—";
+  return `${date.toISOString().slice(11, 19)} UTC`;
+}
+
+async function apiJson(path, { timeout = 10_000 } = {}) {
+  const response = await fetch(`${EXPLORER_API}${path}`, {
+    headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(timeout),
+  });
+  if (!response.ok) throw new Error(`Explorer API returned HTTP ${response.status}`);
+  return response.json();
+}
+
+async function refreshExplorerPulse() {
+  try {
+    const [stats, blocks] = await Promise.all([apiJson("/stats"), apiJson("/blocks")]);
+    $("#indexTransactions").textContent = formatInteger(stats.total_transactions);
+    $("#indexAddresses").textContent = formatInteger(stats.total_addresses);
+    $("#indexBlocks").textContent = formatInteger(stats.total_blocks);
+    $("#indexBlockTime").textContent = Number.isFinite(Number(stats.average_block_time))
+      ? `${(Number(stats.average_block_time) / 1000).toFixed(2)} s`
+      : "—";
+    $("#indexStatus").textContent = "LIVE";
+
+    const list = $("#recentBlocks");
+    list.replaceChildren();
+    (blocks.items || []).slice(0, 6).forEach((block) => {
+      const item = document.createElement("li");
+      const title = document.createElement("strong");
+      title.textContent = `#${formatInteger(block.height)}`;
+      const meta = document.createElement("span");
+      meta.textContent = `${formatInteger(block.transactions_count)} tx · ${formatInteger(block.size)} B · ${formatUtc(block.timestamp)}`;
+      item.append(title, meta);
+      list.append(item);
+    });
+    if (!list.children.length) list.innerHTML = '<li class="loading-row">No indexed blocks returned.</li>';
+  } catch {
+    $("#indexStatus").textContent = "UNAVAILABLE";
+    $("#recentBlocks").innerHTML = '<li class="loading-row">The explorer index is temporarily unavailable.</li>';
+  }
+}
+
+async function refreshContractRadar() {
+  const button = $("#radarRefresh");
+  const status = $("#radarStatus");
+  const list = $("#radarList");
+  button.disabled = true;
+  status.textContent = "Reading index…";
+  try {
+    const payload = await apiJson("/smart-contracts");
+    list.replaceChildren();
+    (payload.items || []).slice(0, 10).forEach((contract, index) => {
+      const address = contract.address?.hash || "";
+      const item = document.createElement("li");
+
+      const number = document.createElement("span");
+      number.className = "radar-index";
+      number.textContent = String(index + 1).padStart(2, "0");
+
+      const identity = document.createElement("div");
+      identity.className = "radar-contract";
+      const name = document.createElement("strong");
+      name.textContent = contract.address?.name || "Verified contract";
+      const code = document.createElement("code");
+      code.textContent = address;
+      identity.append(name, code);
+
+      const meta = document.createElement("div");
+      meta.className = "radar-meta";
+      const proxy = contract.address?.proxy_type ? ` · ${contract.address.proxy_type}` : "";
+      meta.textContent = `${contract.language || "source"} · ${contract.compiler_version || "compiler n/a"}${proxy}`;
+
+      const link = document.createElement("a");
+      link.href = `${EXPLORER_URL}/address/${address}`;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = "Inspect ↗";
+
+      item.append(number, identity, meta, link);
+      list.append(item);
+    });
+    if (!list.children.length) list.innerHTML = '<li class="loading-row">No recently verified contracts returned.</li>';
+    status.textContent = `Updated ${new Date().toISOString().slice(11, 19)} UTC`;
+  } catch {
+    list.innerHTML = '<li class="loading-row">The contract index is temporarily unavailable.</li>';
+    status.textContent = "Unavailable";
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function refreshNetworkPulse() {
@@ -441,18 +610,19 @@ async function inspectAddress(rawAddress) {
   }
 
   $("#addressInput").removeAttribute("aria-invalid");
-  status.textContent = "Reading Elysium testnet…";
+  status.textContent = "Reading Elysium public RPC…";
   try {
     const { results: blockResults } = await rpcBatch([{ method: "eth_blockNumber" }]);
     const blockHex = blockResults[0];
     const observedBlock = Number.parseInt(blockHex, 16);
     if (!Number.isFinite(observedBlock)) throw new Error("Invalid block number");
 
-    const { results } = await rpcBatch([
+    const rpcResult = await rpcBatch([
       { method: "eth_getCode", params: [address, blockHex] },
       { method: "eth_getBalance", params: [address, blockHex] },
       { method: "eth_getTransactionCount", params: [address, blockHex] },
     ]);
+    const { results } = rpcResult;
     const [code, balanceHex, nonceHex] = results;
     const classification = classifyAddress(code, balanceHex, nonceHex);
     const byteCount = Math.max(0, (code.length - 2) / 2);
@@ -460,26 +630,56 @@ async function inspectAddress(rawAddress) {
     const nonce = Number.parseInt(nonceHex, 16);
 
     state.address = address;
-    networkState.addressSnapshot = { address, observedBlock, byteCount, balance, nonce, ...classification };
+    networkState.addressSnapshot = {
+      address,
+      observedBlock,
+      byteCount,
+      balance,
+      nonce,
+      txCount: nonce,
+      ...classification,
+    };
     $("#probeEmpty").hidden = true;
     $("#probeResult").hidden = false;
     $("#verdictMark").textContent = classification.mark;
     $("#verdictMark").dataset.tone = classification.tone;
     $("#addressVerdict").textContent = classification.verdict;
-    $("#resultAddress").textContent = `${address.slice(0, 8)}…${address.slice(-6)}`;
+    $("#resultAddress").textContent = shortAddress(address);
     $("#resultAddress").title = address;
     $("#resultBytecode").textContent = byteCount ? `${byteCount.toLocaleString("en-US")} bytes` : "None";
     $("#resultBalance").textContent = balance;
     $("#resultNonce").textContent = nonce.toLocaleString("en-US");
+    $("#resultBlock").textContent = `#${observedBlock.toLocaleString("en-US")}`;
+    $("#resultSource").textContent = "Elysium public RPC";
     $("#explorerLink").href = `${EXPLORER_URL}/address/${address}`;
     status.textContent = `Read from block #${observedBlock.toLocaleString("en-US")}. This does not prove ownership or authorship.`;
+    updateBuilderProof(networkState.addressSnapshot);
     updateUrl();
   } catch {
     status.textContent = "The public RPC did not return an address result. Try again.";
   }
 }
 
-$("#refreshNetwork").addEventListener("click", refreshNetworkPulse);
+function updateBuilderProof(snapshot) {
+  const card = $("#builderProofCard");
+  card.classList.remove("is-empty");
+  $("#proofCardBlock").textContent = `BLOCK ${snapshot.observedBlock.toLocaleString("en-US")}`;
+  $("#proofCardAddress").textContent = snapshot.address;
+  $("#proofCardVerdict").textContent = snapshot.verdict;
+  $("#proofCardBytecode").textContent = snapshot.byteCount ? `${snapshot.byteCount.toLocaleString("en-US")} bytes` : "None";
+  $("#proofCardTransactions").textContent = Number.isFinite(snapshot.txCount) ? snapshot.txCount.toLocaleString("en-US") : "—";
+  $("#proofCardSource").textContent = "Elysium public RPC";
+  $("#copyProof").disabled = false;
+  $("#downloadProof").disabled = false;
+  $("#builderStatus").textContent = "Snapshot ready. This is public chain evidence, not an ownership claim.";
+}
+
+$("#refreshNetwork").addEventListener("click", () => {
+  refreshNetworkPulse();
+  refreshExplorerPulse();
+});
+
+$("#radarRefresh").addEventListener("click", refreshContractRadar);
 
 $("#addressProbeForm").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -568,7 +768,7 @@ function drawAddressSnapshotCard() {
 
   ctx.fillStyle = "#bba8b3";
   ctx.font = "15px Arial";
-  ctx.fillText("Public-RPC snapshot · no ownership or authorship claim · no wallet connection · unofficial", 238, 548);
+  ctx.fillText("Public-RPC snapshot · no ownership or authorship claim · no wallet connection · independent", 238, 548);
   ctx.fillStyle = "#fff8fb";
   ctx.font = "700 14px monospace";
   ctx.fillText(`GAS ${networkState.gasGwei || "—"} GWEI`, 238, 586);
@@ -586,7 +786,7 @@ $("#downloadProof").addEventListener("click", () => {
   link.download = `elysium-address-snapshot-${networkState.addressSnapshot.address.slice(0, 8)}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
-  $("#probeStatus").textContent = "1200×630 address snapshot downloaded.";
+  $("#builderStatus").textContent = "1200×630 builder proof card downloaded.";
 });
 
 $("#copyProof").addEventListener("click", async () => {
@@ -601,16 +801,133 @@ $("#copyProof").addEventListener("click", async () => {
     `Bytecode: ${snapshot.byteCount.toLocaleString("en-US")} bytes`,
     `Balance: ${snapshot.balance}`,
     `Nonce: ${snapshot.nonce}`,
+    `Outgoing nonce: ${snapshot.nonce}`,
+    "Source: Elysium public RPC",
     `Observed: ${new Date().toISOString()}`,
-    "Read-only RPC snapshot. It does not prove ownership, authorship or Ascend test participation.",
-    "Unofficial community tool.",
+    "Read-only public-data snapshot. It does not prove ownership, authorship, builder status or Ascend test participation.",
+    "Independent community tool.",
     location.href,
   ].join("\n");
   try {
     await navigator.clipboard.writeText(text);
-    $("#probeStatus").textContent = "Address snapshot copied.";
+    $("#builderStatus").textContent = "Builder proof text copied.";
   } catch {
-    $("#probeStatus").textContent = "Clipboard access was unavailable.";
+    $("#builderStatus").textContent = "Clipboard access was unavailable.";
+  }
+});
+
+function holderShare(value, totalSupply) {
+  try {
+    const valueBigInt = BigInt(value || "0");
+    const supplyBigInt = BigInt(totalSupply || "0");
+    if (supplyBigInt === 0n) return 0;
+    return Number((valueBigInt * 10_000n) / supplyBigInt) / 100;
+  } catch {
+    return 0;
+  }
+}
+
+async function inspectToken(rawAddress) {
+  const address = rawAddress.trim();
+  const status = $("#lensStatus");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    status.textContent = "Enter a complete 42-character ERC-20 address.";
+    $("#tokenAddressInput").setAttribute("aria-invalid", "true");
+    return;
+  }
+
+  $("#tokenAddressInput").removeAttribute("aria-invalid");
+  status.textContent = "Reading the token index…";
+  try {
+    const token = await apiJson(`/tokens/${address}`, { timeout: 15_000 });
+
+    $("#lensEmpty").hidden = true;
+    $("#lensResult").hidden = false;
+    $("#lensSymbol").textContent = token.symbol || token.type || "TOKEN";
+    $("#lensName").textContent = token.name || "Indexed token";
+    $("#lensHolders").textContent = formatInteger(token.holders_count);
+    $("#lensVolume").textContent = formatUsdMetric(token.volume_24h);
+    $("#lensMarketCap").textContent = formatUsdMetric(token.circulating_market_cap);
+    $("#lensConcentration").textContent = "Loading…";
+    $("#lensExplorerLink").href = `${EXPLORER_URL}/token/${address}`;
+
+    const list = $("#lensHolderList");
+    list.replaceChildren();
+    const loadingItem = document.createElement("li");
+    loadingItem.className = "holder-note";
+    loadingItem.textContent = "Reading the holder index…";
+    list.append(loadingItem);
+    status.textContent = `Token metrics live · ${new Date().toISOString().slice(11, 19)} UTC. Reading holder distribution…`;
+    void loadTokenHolders(address, token.total_supply);
+  } catch {
+    $("#lensResult").hidden = true;
+    $("#lensEmpty").hidden = false;
+    $("#lensEmpty").textContent = "No indexed ERC-20 record was returned for this address.";
+    status.textContent = "The token index did not return a result.";
+  }
+}
+
+async function loadTokenHolders(address, totalSupply) {
+  const status = $("#lensStatus");
+  const list = $("#lensHolderList");
+  try {
+    const holders = await apiJson(`/tokens/${address}/holders`, { timeout: 20_000 });
+    if ($("#tokenAddressInput").value.toLowerCase() !== address.toLowerCase()) return;
+    const holderItems = holders.items || [];
+    const topTenShare = holderItems
+      .slice(0, 10)
+      .reduce((sum, holder) => sum + holderShare(holder.value, totalSupply), 0);
+
+    $("#lensConcentration").textContent = holderItems.length ? `${topTenShare.toFixed(1)}%` : "Unavailable";
+    list.replaceChildren();
+    holderItems.slice(0, 5).forEach((holder, index) => {
+      const item = document.createElement("li");
+      const rank = document.createElement("span");
+      rank.textContent = String(index + 1).padStart(2, "0");
+      const holderAddress = document.createElement("code");
+      holderAddress.textContent = holder.address?.hash || "Unknown address";
+      const share = document.createElement("strong");
+      share.textContent = `${holderShare(holder.value, totalSupply).toFixed(2)}%`;
+      item.append(rank, holderAddress, share);
+      list.append(item);
+    });
+    if (!holderItems.length) {
+      const emptyItem = document.createElement("li");
+      emptyItem.className = "holder-note";
+      emptyItem.textContent = "No holder rows were returned by the index.";
+      list.append(emptyItem);
+    }
+    status.textContent = `Token and holder indexes live · ${new Date().toISOString().slice(11, 19)} UTC.`;
+  } catch {
+    if ($("#tokenAddressInput").value.toLowerCase() !== address.toLowerCase()) return;
+    $("#lensConcentration").textContent = "Unavailable";
+    list.replaceChildren();
+    const item = document.createElement("li");
+    item.className = "holder-note";
+    item.textContent = "Holder index unavailable. No estimate substituted.";
+    list.append(item);
+    status.textContent = "Token metrics live · holder breakdown is temporarily unavailable.";
+  }
+}
+
+$("#tokenLensForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  inspectToken($("#tokenAddressInput").value);
+});
+
+$("#loadTopToken").addEventListener("click", async () => {
+  const button = $("#loadTopToken");
+  button.disabled = true;
+  try {
+    const payload = await apiJson("/tokens", { timeout: 20_000 });
+    const address = payload.items?.[0]?.address_hash;
+    if (!address) throw new Error("No indexed token");
+    $("#tokenAddressInput").value = address;
+    await inspectToken(address);
+  } catch {
+    $("#lensStatus").textContent = "The token index is temporarily unavailable.";
+  } finally {
+    button.disabled = false;
   }
 });
 
@@ -621,10 +938,12 @@ function hydrateFromUrl() {
   const recipient = params.get("role");
   const period = params.get("period");
   const address = params.get("address") || "";
+  const moduleName = params.get("module") || "pulse";
 
   if (Number.isFinite(volume) && volume >= 0) state.dailyVolume = clamp(volume, 0, 1_000_000_000);
   if (recipient in MODEL.recipients) state.recipient = recipient;
   if (period in MODEL.periods) state.period = period;
+  if (MODULES.has(moduleName)) state.module = moduleName;
   if (/^0x[0-9a-fA-F]{40}$/.test(address)) {
     state.address = address;
     $("#addressInput").value = address;
@@ -635,7 +954,11 @@ function hydrateFromUrl() {
 }
 
 hydrateFromUrl();
+setActiveModule(state.module);
 render();
 refreshNetworkPulse();
+refreshExplorerPulse();
+refreshContractRadar();
 if (state.address) inspectAddress(state.address);
 window.setInterval(refreshNetworkPulse, 15_000);
+window.setInterval(refreshExplorerPulse, 60_000);

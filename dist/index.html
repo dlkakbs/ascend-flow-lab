@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Ascend Flow Lab is an unofficial, read-only Elysium testnet telemetry tool and interactive model of Ascend's proposed fee allocation."
+      content="Ascend Flow Lab is an independent, read-only workspace for live Elysium testnet data, contract inspection, builder snapshots and Ascend's proposed economics."
     />
     <meta name="theme-color" content="#f6e8ef" />
     <meta property="og:title" content="Ascend Flow Lab" />
-    <meta property="og:description" content="Read Elysium live. Model how trading fees move through Ascend's proposed economic design." />
-    <title>Ascend Flow Lab — Live Elysium telemetry and proposed protocol economics</title>
+    <meta property="og:description" content="Inspect Elysium's public testnet, recent verified contracts, token distribution and proposed Ascend economics without connecting a wallet." />
+    <title>Ascend Flow Lab — Live Elysium network intelligence</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#model">Skip to the model</a>
+    <a class="skip-link" href="#workspace">Skip to the workspace</a>
 
     <header class="site-header">
       <a class="wordmark" href="#top" aria-label="Ascend Flow Lab home">
@@ -31,58 +31,85 @@
           rel="noreferrer"
           aria-label="Open the Ascend Flow Lab GitHub repository"
         >GitHub <span aria-hidden="true">↗</span></a>
-        <a href="#proof">Live telemetry</a>
-        <a href="#sources">Sources</a>
+        <button class="text-button" type="button" data-open-module="pulse">Live data</button>
+        <button class="text-button" type="button" data-open-module="roadmap" data-scroll-target="sources">Sources</button>
         <button class="text-button" id="resetButton" type="button">Reset model</button>
       </div>
     </header>
 
+    <nav class="module-nav" id="workspace" aria-label="Ascend Flow Lab modules">
+      <div class="module-nav-track" role="tablist" aria-label="Lab modules">
+        <button id="tab-pulse" type="button" role="tab" aria-selected="true" aria-controls="panel-pulse" data-module-tab="pulse">
+          <span>01</span> Pulse <small>Live</small>
+        </button>
+        <button id="tab-radar" type="button" role="tab" aria-selected="false" aria-controls="panel-radar" data-module-tab="radar" tabindex="-1">
+          <span>02</span> Radar <small>Live</small>
+        </button>
+        <button id="tab-inspect" type="button" role="tab" aria-selected="false" aria-controls="panel-inspect" data-module-tab="inspect" tabindex="-1">
+          <span>03</span> Inspect <small>Live</small>
+        </button>
+        <button id="tab-builder" type="button" role="tab" aria-selected="false" aria-controls="panel-builder" data-module-tab="builder" tabindex="-1">
+          <span>04</span> Builder proof <small>Live</small>
+        </button>
+        <button id="tab-lens" type="button" role="tab" aria-selected="false" aria-controls="panel-lens" data-module-tab="lens" tabindex="-1">
+          <span>05</span> Project lens <small>Live</small>
+        </button>
+        <button id="tab-atlas" type="button" role="tab" aria-selected="false" aria-controls="panel-atlas" data-module-tab="atlas" tabindex="-1">
+          <span>06</span> Atlas <small>Soon</small>
+        </button>
+        <button id="tab-model" type="button" role="tab" aria-selected="false" aria-controls="panel-model" data-module-tab="model" tabindex="-1">
+          <span>07</span> Ascend model <small>Reference</small>
+        </button>
+        <button id="tab-roadmap" type="button" role="tab" aria-selected="false" aria-controls="panel-roadmap" data-module-tab="roadmap" tabindex="-1">
+          <span>08</span> Roadmap
+        </button>
+      </div>
+    </nav>
+
     <main id="top">
-      <section class="hero page-grid" aria-labelledby="hero-title">
+      <section class="hero page-grid" id="panel-pulse" role="tabpanel" data-module-section="pulse" aria-labelledby="tab-pulse hero-title">
         <div class="hero-index" aria-hidden="true">
-          <span>FIELD NOTE</span>
-          <strong>01—26</strong>
+          <span>NETWORK INDEX</span>
+          <strong>99801</strong>
         </div>
 
         <div class="hero-copy">
-          <p class="eyebrow">Live Elysium telemetry × proposed Ascend economics</p>
-          <h1 id="hero-title">Follow<br /><em>every fee</em> dollar.</h1>
+          <p class="eyebrow">Public RPC × official explorer index</p>
+          <h1 id="hero-title">Live Elysium<br /><em>network data.</em></h1>
           <p class="hero-lede">
-            Read Elysium’s public testnet directly, inspect an address, then model how a
-            hypothetical trading-volume scenario would allocate fees across the published proposal.
+            Read the current network state, recent blocks and indexed activity directly from
+            Elysium’s public testnet. No wallet connection, signature or transaction.
           </p>
           <div class="hero-actions">
-            <a class="primary-action" href="#proof">Verify the chain <span aria-hidden="true">↓</span></a>
-            <a class="secondary-action" href="https://ascendlaunch.gitbook.io/docs" target="_blank" rel="noreferrer">
-              Read the litepaper <span aria-hidden="true">↗</span>
-            </a>
+            <a class="primary-action" href="#proof">Open live console <span aria-hidden="true">↓</span></a>
+            <button class="secondary-action" type="button" data-open-module="radar">View contract radar <span aria-hidden="true">→</span></button>
           </div>
         </div>
 
-        <aside class="hero-ledger" aria-label="Model facts">
+        <aside class="hero-ledger" aria-label="Data boundaries">
           <div class="ledger-heading">
-            <span>MODEL BASIS</span>
-            <span>SEP 2026 LITEPAPER</span>
+            <span>DATA BASIS</span>
+            <span>ELY TESTNET</span>
           </div>
           <dl>
             <div>
-              <dt>Token trading fee</dt>
-              <dd>1.00%</dd>
+              <dt>Chain ID</dt>
+              <dd>99801</dd>
             </div>
             <div>
-              <dt>Protocol split</dt>
-              <dd>50 / 50</dd>
+              <dt>Network</dt>
+              <dd>Testnet</dd>
             </div>
             <div>
-              <dt>Protocol token</dt>
-              <dd>None</dd>
+              <dt>Access</dt>
+              <dd>Read only</dd>
             </div>
             <div>
-              <dt>Model status</dt>
-              <dd>Proposed</dd>
+              <dt>Sources</dt>
+              <dd>RPC + API</dd>
             </div>
           </dl>
-          <p>Selected parameters and implementation details remain under development.</p>
+          <p>Live values may pause when a public endpoint is unavailable. The interface never substitutes estimated data.</p>
         </aside>
 
         <div class="network-tape" aria-live="polite">
@@ -94,17 +121,16 @@
         </div>
       </section>
 
-      <section class="proof-section" id="proof" aria-labelledby="proof-title">
+      <section class="proof-section" id="proof" data-module-section="pulse" aria-labelledby="proof-title">
         <div class="section-heading page-grid proof-heading">
           <div class="section-number">01</div>
           <div>
             <p class="eyebrow">Elysium testnet telemetry</p>
-            <h2 id="proof-title">Live network<br />data.</h2>
+            <h2 id="proof-title">Network<br />pulse.</h2>
           </div>
           <p class="section-intro">
-            The live telemetry below is requested from Elysium’s public testnet RPC in your browser.
-            No wallet connection, signature or transaction is required. This read-only tool creates
-            no onchain activity.
+            RPC values and official explorer indexes are read independently, so current chain state
+            and indexed totals remain clearly separated. Nothing is signed or submitted.
           </p>
         </div>
 
@@ -163,42 +189,81 @@
             </div>
           </div>
 
+          <div class="index-panel" aria-live="polite">
+            <div class="index-panel-heading">
+              <div><p class="micro-label">OFFICIAL INDEX</p><h3>Explorer totals</h3></div>
+              <span class="read-only-badge" id="indexStatus">SYNCING</span>
+            </div>
+            <dl class="index-stat-grid">
+              <div><dt>Transactions</dt><dd id="indexTransactions">—</dd></div>
+              <div><dt>Addresses</dt><dd id="indexAddresses">—</dd></div>
+              <div><dt>Indexed blocks</dt><dd id="indexBlocks">—</dd></div>
+              <div><dt>Indexed avg. block time</dt><dd id="indexBlockTime">—</dd></div>
+            </dl>
+            <div class="recent-blocks">
+              <div class="table-heading"><span>RECENT INDEXED BLOCKS</span><span>TX / SIZE / UTC</span></div>
+              <ol id="recentBlocks"><li class="loading-row">Waiting for explorer index…</li></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-module radar-section" id="panel-radar" role="tabpanel" data-module-section="radar" aria-labelledby="radar-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">02</div>
+          <div><p class="eyebrow">Official explorer index</p><h2 id="radar-title">Contract<br />radar.</h2></div>
+          <p class="section-intro">Recently verified contracts from Elysium’s public explorer API. “Verified” means source metadata is published; it is not an audit or endorsement.</p>
+        </div>
+        <div class="module-shell page-grid">
+          <aside class="module-rail">
+            <span class="module-state live">LIVE NOW</span>
+            <p>Source: Elysium’s official Blockscout API.</p>
+            <button class="mini-action" id="radarRefresh" type="button">Refresh radar ↻</button>
+          </aside>
+          <div class="radar-board">
+            <div class="radar-topline"><span>RECENTLY VERIFIED</span><span id="radarStatus">Loading…</span></div>
+            <ol class="radar-list" id="radarList"><li class="loading-row">Reading verified contracts…</li></ol>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-module inspect-section" id="panel-inspect" role="tabpanel" data-module-section="inspect" aria-labelledby="inspect-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">03</div>
+          <div><p class="eyebrow">Block-specific public RPC</p><h2 id="inspect-title">Inspect an<br />address.</h2></div>
+          <p class="section-intro">Pin code, native balance and outgoing nonce to one observed block. The result is public chain state, not proof of ownership or authorship.</p>
+        </div>
+        <div class="module-shell page-grid">
+          <aside class="module-rail">
+            <span class="module-state live">READ ONLY</span>
+            <p>No connection, signature or transaction request.</p>
+          </aside>
           <div class="address-probe">
             <div class="probe-heading">
-              <div>
-                <p class="micro-label">ADDRESS PROBE</p>
-                <h3>Is it deployed on Elysium?</h3>
-              </div>
-              <span class="read-only-badge">READ ONLY</span>
+              <div><p class="micro-label">ADDRESS PROBE</p><h3>Contract or wallet?</h3></div>
+              <span class="read-only-badge">CHAIN 99801</span>
             </div>
             <form id="addressProbeForm" novalidate>
-              <label for="addressInput">Contract or wallet address</label>
+              <label for="addressInput">Elysium testnet address</label>
               <div class="probe-input-row">
                 <input id="addressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x…" aria-describedby="addressHelp" />
                 <button type="submit">Inspect →</button>
               </div>
-              <p id="addressHelp">Queries code, balance and nonce from testnet. Nothing is signed.</p>
+              <p id="addressHelp">Queries Elysium’s public RPC. Nothing is signed.</p>
             </form>
-
-            <div class="probe-empty" id="probeEmpty">
-              <span>↳</span>
-              <p>Paste an Elysium testnet address to create a block-specific network snapshot.</p>
-            </div>
-
+            <div class="probe-empty" id="probeEmpty"><span>↳</span><p>Enter an address to create a block-specific inspection.</p></div>
             <div class="probe-result" id="probeResult" hidden>
-              <div class="result-verdict">
-                <span class="verdict-mark" id="verdictMark">✓</span>
-                <div><small>NETWORK VERDICT</small><strong id="addressVerdict">Contract detected</strong></div>
-              </div>
-              <dl>
+              <div class="result-verdict"><span class="verdict-mark" id="verdictMark">✓</span><div><small>NETWORK RESULT</small><strong id="addressVerdict">Contract detected</strong></div></div>
+              <dl class="inspect-grid">
                 <div><dt>Address</dt><dd id="resultAddress">—</dd></div>
                 <div><dt>Bytecode</dt><dd id="resultBytecode">—</dd></div>
                 <div><dt>HYPE balance</dt><dd id="resultBalance">—</dd></div>
-                <div><dt>Nonce</dt><dd id="resultNonce">—</dd></div>
+                <div><dt>Outgoing nonce</dt><dd id="resultNonce">—</dd></div>
+                <div><dt>Reference block</dt><dd id="resultBlock">—</dd></div>
+                <div><dt>Data source</dt><dd id="resultSource">Public RPC</dd></div>
               </dl>
               <div class="probe-actions">
-                <button class="primary-action" id="copyProof" type="button">Copy address snapshot</button>
-                <button class="secondary-action" id="downloadProof" type="button">Download snapshot ↓</button>
+                <button class="primary-action" type="button" data-open-module="builder">Open builder proof →</button>
                 <a class="secondary-action explorer-action" id="explorerLink" href="https://elysium.kinetiq.xyz/testnet-explorer" target="_blank" rel="noreferrer">Open explorer ↗</a>
               </div>
             </div>
@@ -207,7 +272,91 @@
         </div>
       </section>
 
-      <section class="model-section" id="model" aria-labelledby="model-title">
+      <section class="lab-module builder-section" id="panel-builder" role="tabpanel" data-module-section="builder" aria-labelledby="builder-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">04</div>
+          <div><p class="eyebrow">Shareable chain evidence</p><h2 id="builder-title">Builder<br />proof.</h2></div>
+          <p class="section-intro">Turn the latest address inspection into a sourced text or image snapshot. It records public observations only and makes no identity, ownership or whitelist claim.</p>
+        </div>
+        <div class="module-shell page-grid">
+          <aside class="module-rail">
+            <span class="module-state live">AVAILABLE</span>
+            <p>The proof updates whenever a new address is inspected.</p>
+            <button class="mini-action" type="button" data-open-module="inspect">Inspect an address →</button>
+          </aside>
+          <div class="builder-proof-card is-empty" id="builderProofCard">
+            <div class="proof-card-top"><span>ELY / 99801</span><span id="proofCardBlock">NO SNAPSHOT</span></div>
+            <div class="proof-card-main">
+              <p>PUBLIC ADDRESS OBSERVATION</p>
+              <h3 id="proofCardAddress">Inspect an address first.</h3>
+              <dl>
+                <div><dt>Network result</dt><dd id="proofCardVerdict">—</dd></div>
+                <div><dt>Bytecode</dt><dd id="proofCardBytecode">—</dd></div>
+                <div><dt>Outgoing nonce</dt><dd id="proofCardTransactions">—</dd></div>
+                <div><dt>Source</dt><dd id="proofCardSource">—</dd></div>
+              </dl>
+            </div>
+            <div class="proof-card-bottom"><span>READ ONLY · PUBLIC DATA</span><span>NO OWNERSHIP CLAIM</span></div>
+          </div>
+          <div class="builder-actions">
+            <button class="primary-action" id="copyProof" type="button" disabled>Copy proof text</button>
+            <button class="secondary-action" id="downloadProof" type="button" disabled>Download proof card ↓</button>
+            <p id="builderStatus" aria-live="polite">Waiting for an address inspection.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-module lens-section" id="panel-lens" role="tabpanel" data-module-section="lens" aria-labelledby="lens-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">05</div>
+          <div><p class="eyebrow">Token distribution explorer</p><h2 id="lens-title">Project<br />lens.</h2></div>
+          <p class="section-intro">Inspect public token metrics relevant to project health without inventing an “Ascended” score. Ascend’s exact qualification thresholds are not published.</p>
+        </div>
+        <div class="module-shell page-grid">
+          <aside class="module-rail">
+            <span class="module-state live">RAW METRICS</span>
+            <p>Market data comes from Elysium’s explorer. Holder concentration appears only when its index responds.</p>
+            <button class="mini-action" id="loadTopToken" type="button">Load top indexed token →</button>
+          </aside>
+          <div class="lens-board">
+            <form class="lens-form" id="tokenLensForm" novalidate>
+              <label for="tokenAddressInput">ERC-20 contract address</label>
+              <div class="probe-input-row"><input id="tokenAddressInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="0x…" /><button type="submit">Inspect token →</button></div>
+            </form>
+            <div class="lens-empty" id="lensEmpty">Enter an indexed ERC-20 address to read its current public metrics.</div>
+            <div class="lens-result" id="lensResult" hidden>
+              <div class="lens-identity"><div><span id="lensSymbol">—</span><h3 id="lensName">—</h3></div><a id="lensExplorerLink" href="https://elysium.kinetiq.xyz/testnet-explorer/tokens" target="_blank" rel="noreferrer">Explorer ↗</a></div>
+              <dl class="lens-metrics">
+                <div><dt>Holders</dt><dd id="lensHolders">—</dd></div>
+                <div><dt>24h volume</dt><dd id="lensVolume">—</dd></div>
+                <div><dt>Indexed market cap</dt><dd id="lensMarketCap">—</dd></div>
+                <div><dt>Top 10 concentration</dt><dd id="lensConcentration">—</dd></div>
+              </dl>
+              <div class="holder-list"><div class="table-heading"><span>LARGEST INDEXED HOLDERS</span><span>SHARE</span></div><ol id="lensHolderList"></ol></div>
+              <p class="lens-boundary">These are raw explorer observations, not an Ascend eligibility assessment or investment analysis.</p>
+            </div>
+            <p class="probe-status" id="lensStatus" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-module atlas-section" id="panel-atlas" role="tabpanel" data-module-section="atlas" aria-labelledby="atlas-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">06</div>
+          <div><p class="eyebrow">Curated ecosystem directory</p><h2 id="atlas-title">Elysium<br />atlas.</h2></div>
+          <p class="section-intro">A project directory needs verified project identity and official contract links. Contract names alone are not enough, so this module remains deliberately unpublished.</p>
+        </div>
+        <div class="soon-board page-grid">
+          <div class="module-rail"><span class="module-state soon">SOON</span><p>Awaiting a trustworthy curation and verification workflow.</p></div>
+          <div class="soon-canvas">
+            <div class="soon-mark">06</div>
+            <div><p class="micro-label">PLANNED MODULE</p><h3>Projects, contracts and current activity—linked without guessing.</h3></div>
+            <ul><li>Verified project identity</li><li>Official testnet contracts</li><li>Category and source links</li><li>Latest indexed activity</li></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="model-section" id="panel-model" role="tabpanel" data-module-section="model" aria-labelledby="model-title" hidden>
         <div class="section-heading page-grid">
           <div class="section-number">02</div>
           <div>
@@ -428,7 +577,7 @@
         </div>
       </section>
 
-      <section class="comparison-section" aria-labelledby="comparison-title">
+      <section class="comparison-section" data-module-section="model" aria-labelledby="comparison-title" hidden>
         <div class="page-grid section-heading compact">
           <div class="section-number">03</div>
           <div>
@@ -472,7 +621,7 @@
         </div>
       </section>
 
-      <section class="nft-section page-grid" aria-labelledby="nft-title">
+      <section class="nft-section page-grid" data-module-section="model" aria-labelledby="nft-title" hidden>
         <div class="section-number">04</div>
         <div class="nft-copy">
           <p class="eyebrow">Ascend NFT mechanics</p>
@@ -518,7 +667,7 @@
         </div>
       </section>
 
-      <section class="share-section" aria-labelledby="share-title">
+      <section class="share-section" data-module-section="model" aria-labelledby="share-title" hidden>
         <div class="share-inner page-grid">
           <div class="section-number">05</div>
           <div class="share-copy">
@@ -547,19 +696,42 @@
         </div>
       </section>
 
-      <section class="sources-section page-grid" id="sources" aria-labelledby="sources-title">
-        <div class="section-number">06</div>
+      <section class="roadmap-section" id="panel-roadmap" role="tabpanel" data-module-section="roadmap" aria-labelledby="roadmap-title" hidden>
+        <div class="module-heading page-grid">
+          <div class="section-number">08</div>
+          <div><p class="eyebrow">Delivery map</p><h2 id="roadmap-title">What works<br />and what waits.</h2></div>
+          <p class="section-intro">A public interface should show its data boundary as clearly as its features. “Live” means a working public source was verified; “Soon” means the required evidence layer is not ready.</p>
+        </div>
+        <div class="roadmap-board page-grid">
+          <div class="roadmap-axis" aria-hidden="true"><span>NOW</span><span>NEXT</span><span>LATER</span></div>
+          <article class="roadmap-card current">
+            <div><span>01</span><strong>Live foundation</strong><small>Available now</small></div>
+            <ul><li>Network pulse and recent blocks</li><li>Recently verified contract radar</li><li>Public-RPC address inspection</li><li>Shareable builder proof</li><li>Token metrics and indexed holder concentration</li><li>Ascend economics reference</li></ul>
+          </article>
+          <article class="roadmap-card next">
+            <div><span>02</span><strong>Deeper history</strong><small>Next</small></div>
+            <ul><li>Longer activity windows</li><li>Contract-to-deployer relationship views</li><li>Saved comparison sets in the browser</li><li>More complete transaction classification</li></ul>
+          </article>
+          <article class="roadmap-card later">
+            <div><span>03</span><strong>Ecosystem atlas</strong><small>Soon</small></div>
+            <ul><li>Verified project submissions</li><li>Official contract ownership links</li><li>Curated categories and project sources</li><li>Project-level activity timeline</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="sources-section page-grid" id="sources" data-module-section="roadmap" aria-labelledby="sources-title" hidden>
+        <div class="section-number">08</div>
         <div class="sources-copy">
           <p class="eyebrow">Source ledger</p>
           <h2 id="sources-title">Every rule,<br />traceable.</h2>
           <p>
-            This tool models the published proposal. It is not affiliated with Ascend, Kinetiq or Elysium,
-            and it is not a forecast, audit, investment recommendation or statement of final protocol behavior.
-            It does not connect to Ascend’s gated application or prove participation in an Ascend test.
+            Live chain modules read Elysium’s public RPC and official explorer API. The Ascend module models
+            the published proposal. This independent tool is not an audit, endorsement, investment recommendation
+            or proof of identity, ownership, authorship, builder status or whitelist eligibility.
           </p>
           <aside class="current-boundary" aria-label="Current access boundary">
             <span>CURRENT BOUNDARY · CHECKED 10 OCT 2026</span>
-            <p>Elysium’s public testnet RPC, explorer, faucet and bridge are accessible. Ascend’s application currently shows private access. This site reads Elysium only and sends no transactions.</p>
+            <p>Elysium’s public testnet RPC and official explorer API are accessible. Ascend’s application remains outside this tool. Every module is read-only and sends no transactions.</p>
             <a href="https://ascendlaunch.xyz" target="_blank" rel="noreferrer">Check Ascend access ↗</a>
           </aside>
         </div>
@@ -567,6 +739,7 @@
           <li><span>01</span><a href="https://elysium.kinetiq.xyz/docs/what-is-elysium" target="_blank" rel="noreferrer"><strong>What is Elysium</strong><small>Architecture, HyperEVM settlement and HYPE gas</small></a></li>
           <li><span>02</span><a href="https://elysium.kinetiq.xyz/docs/building-on-elysium" target="_blank" rel="noreferrer"><strong>Building on Elysium</strong><small>RPC, chain ID and developer configuration</small></a></li>
           <li><span>03</span><a href="https://elysium.kinetiq.xyz/docs/chain-specifications" target="_blank" rel="noreferrer"><strong>Chain Specifications</strong><small>Official rollup and network parameters</small></a></li>
+          <li><span>API</span><a href="https://testnet-api.elysium.kinetiq.xyz/api/v2/stats" target="_blank" rel="noreferrer"><strong>Elysium Explorer API</strong><small>Official indexed blocks, addresses, contracts and tokens</small></a></li>
           <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs" target="_blank" rel="noreferrer"><strong>About Ascend</strong><small>Scope, proposed status and no protocol token</small></a></li>
           <li><span>05</span><a href="https://ascendlaunch.gitbook.io/docs/the-ascend-token-lifecycle" target="_blank" rel="noreferrer"><strong>Token Lifecycle</strong><small>Launch, Ascended, HyperCore spot and HIP-3 pathway</small></a></li>
           <li><span>06</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
