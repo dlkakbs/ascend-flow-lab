@@ -14,14 +14,14 @@ The project is a buildless static site. Open `dist/index.html` directly or serve
 
 All financial outputs are illustrative USD equivalents. The site links every modeled rule to the official Ascend litepaper and labels the design as proposed and unofficial.
 
-## Live Elysium proof
+## Live Elysium telemetry
 
 - Verifies chain ID, latest block, gas price, transaction count and browser-to-RPC latency
 - Builds a local block-progression trace from live observations
 - Inspects any testnet address with `eth_getCode`, `eth_getBalance` and `eth_getTransactionCount`
-- Generates shareable text and a 1200×630 build-proof card without connecting a wallet or requesting a signature
+- Generates a shareable, block-specific address snapshot without connecting a wallet or requesting a signature
 
-Network data comes directly from `https://testnet-rpc.elysium.kinetiq.xyz`. The interface performs no writes, never requests wallet access and does not create onchain activity.
+Network data comes directly from `https://testnet-rpc.elysium.kinetiq.xyz`. The interface performs no writes, never requests wallet access and does not create onchain activity. An address snapshot confirms only the state returned for that address at the recorded block; it does not prove ownership, authorship, or Ascend test participation. The site does not connect to Ascend's gated application.
 
 ## Local preview
 

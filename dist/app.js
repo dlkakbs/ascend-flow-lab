@@ -26,7 +26,7 @@ const networkState = {
   latency: null,
   updatedAt: null,
   samples: [],
-  addressProof: null,
+  addressSnapshot: null,
 };
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -47,7 +47,7 @@ function formatMoney(value, compact = false) {
       style: "currency",
       currency: "USD",
       notation: "compact",
-      maximumFractionDigits: safe >= 1_000_000 ? 2 : 1,
+      maximumFractionDigits: 2,
     }).format(safe);
   }
   return new Intl.NumberFormat("en-US", {
@@ -218,6 +218,7 @@ function snapshotText() {
     `KNTQ purchases: ${formatMoney(values.kntq)}`,
     `KNTQ burn allocation: ${formatMoney(values.kntqBurn)}`,
     `Direct HYPE staker reward pool: ${formatMoney(values.hypeRewards)}`,
+    "Allocations are modeled from the 1% token trading fee, not from the full token volume.",
     "Unofficial illustration of Ascend's proposed model. Not a forecast.",
     "Source: https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation",
   ].join("\n");
@@ -267,14 +268,16 @@ function drawShareCard() {
   ctx.fillText(`${period.label.toUpperCase()} MODEL · UNOFFICIAL`, width - 72, 72);
   ctx.textAlign = "left";
 
-  ctx.font = "44px Georgia";
-  ctx.fillText("Every", 72, 172);
+  ctx.font = "38px Georgia";
+  ctx.fillText("At a 1% trading fee,", 72, 166);
+  const volumeText = formatMoney(values.volume, true);
   ctx.fillStyle = "#8b61d7";
   ctx.font = "italic 74px Georgia";
-  ctx.fillText(formatMoney(values.volume, true), 188, 174);
+  ctx.fillText(volumeText, 72, 238);
+  const volumeWidth = ctx.measureText(volumeText).width;
   ctx.fillStyle = "#0b0c10";
-  ctx.font = "44px Georgia";
-  ctx.fillText("in token volume routes:", 72, 232);
+  ctx.font = "38px Georgia";
+  ctx.fillText("in token volume produces:", 90 + volumeWidth, 232);
 
   const boxes = [
     { x: 72, label: "RECIPIENT", value: values.recipient, color: "#feaa8d" },
@@ -440,10 +443,15 @@ async function inspectAddress(rawAddress) {
   $("#addressInput").removeAttribute("aria-invalid");
   status.textContent = "Reading Elysium testnet…";
   try {
+    const { results: blockResults } = await rpcBatch([{ method: "eth_blockNumber" }]);
+    const blockHex = blockResults[0];
+    const observedBlock = Number.parseInt(blockHex, 16);
+    if (!Number.isFinite(observedBlock)) throw new Error("Invalid block number");
+
     const { results } = await rpcBatch([
-      { method: "eth_getCode", params: [address, "latest"] },
-      { method: "eth_getBalance", params: [address, "latest"] },
-      { method: "eth_getTransactionCount", params: [address, "latest"] },
+      { method: "eth_getCode", params: [address, blockHex] },
+      { method: "eth_getBalance", params: [address, blockHex] },
+      { method: "eth_getTransactionCount", params: [address, blockHex] },
     ]);
     const [code, balanceHex, nonceHex] = results;
     const classification = classifyAddress(code, balanceHex, nonceHex);
@@ -452,7 +460,7 @@ async function inspectAddress(rawAddress) {
     const nonce = Number.parseInt(nonceHex, 16);
 
     state.address = address;
-    networkState.addressProof = { address, byteCount, balance, nonce, ...classification };
+    networkState.addressSnapshot = { address, observedBlock, byteCount, balance, nonce, ...classification };
     $("#probeEmpty").hidden = true;
     $("#probeResult").hidden = false;
     $("#verdictMark").textContent = classification.mark;
@@ -464,7 +472,7 @@ async function inspectAddress(rawAddress) {
     $("#resultBalance").textContent = balance;
     $("#resultNonce").textContent = nonce.toLocaleString("en-US");
     $("#explorerLink").href = `${EXPLORER_URL}/address/${address}`;
-    status.textContent = `Verified against block ${networkState.block ? `#${networkState.block.toLocaleString("en-US")}` : "latest"}.`;
+    status.textContent = `Read from block #${observedBlock.toLocaleString("en-US")}. This does not prove ownership or authorship.`;
     updateUrl();
   } catch {
     status.textContent = "The public RPC did not return an address result. Try again.";
@@ -478,9 +486,9 @@ $("#addressProbeForm").addEventListener("submit", (event) => {
   inspectAddress($("#addressInput").value);
 });
 
-function drawBuildProofCard() {
-  const proof = networkState.addressProof;
-  if (!proof) return null;
+function drawAddressSnapshotCard() {
+  const snapshot = networkState.addressSnapshot;
+  if (!snapshot) return null;
   const canvas = $("#shareCanvas");
   const ctx = canvas.getContext("2d");
   const { width, height } = canvas;
@@ -514,7 +522,7 @@ function drawBuildProofCard() {
 
   ctx.fillStyle = "#fff8fb";
   ctx.font = "700 19px Arial";
-  ctx.fillText("ASCEND FLOW LAB / BUILD PROOF", 238, 60);
+  ctx.fillText("ASCEND FLOW LAB / ADDRESS SNAPSHOT", 238, 60);
   ctx.textAlign = "right";
   ctx.fillStyle = "#fb9b9e";
   ctx.font = "700 16px monospace";
@@ -522,25 +530,25 @@ function drawBuildProofCard() {
   ctx.textAlign = "left";
 
   ctx.fillStyle = "#fff8fb";
-  ctx.font = "76px Georgia";
-  ctx.fillText("Build", 238, 162);
+  ctx.font = "68px Georgia";
+  ctx.fillText("Address", 238, 162);
   ctx.fillStyle = "#fed6af";
-  ctx.font = "italic 92px Georgia";
-  ctx.fillText("proof.", 414, 162);
+  ctx.font = "italic 78px Georgia";
+  ctx.fillText("snapshot.", 492, 162);
 
   ctx.strokeStyle = "#6f5d68";
   ctx.strokeRect(238, 208, width - 296, 104);
   ctx.fillStyle = "#bba8b3";
   ctx.font = "700 14px monospace";
-  ctx.fillText("VERIFIED ADDRESS", 262, 242);
+  ctx.fillText("OBSERVED ADDRESS", 262, 242);
   ctx.fillStyle = "#fff8fb";
   ctx.font = "700 24px monospace";
-  ctx.fillText(proof.address, 262, 286);
+  ctx.fillText(snapshot.address, 262, 286);
 
   const stats = [
-    ["NETWORK VERDICT", proof.verdict],
-    ["OBSERVED BLOCK", networkState.block ? `#${networkState.block.toLocaleString("en-US")}` : "LATEST"],
-    ["BYTECODE", proof.byteCount ? `${proof.byteCount.toLocaleString("en-US")} BYTES` : "NONE"],
+    ["NETWORK RESULT", snapshot.verdict],
+    ["BLOCK USED", `#${snapshot.observedBlock.toLocaleString("en-US")}`],
+    ["BYTECODE", snapshot.byteCount ? `${snapshot.byteCount.toLocaleString("en-US")} BYTES` : "NONE"],
   ];
   const boxWidth = (width - 296) / 3;
   stats.forEach(([label, value], index) => {
@@ -560,7 +568,7 @@ function drawBuildProofCard() {
 
   ctx.fillStyle = "#bba8b3";
   ctx.font = "15px Arial";
-  ctx.fillText("Direct public-RPC observation · no wallet connection · no signature · unofficial community tool", 238, 548);
+  ctx.fillText("Public-RPC snapshot · no ownership or authorship claim · no wallet connection · unofficial", 238, 548);
   ctx.fillStyle = "#fff8fb";
   ctx.font = "700 14px monospace";
   ctx.fillText(`GAS ${networkState.gasGwei || "—"} GWEI`, 238, 586);
@@ -572,34 +580,35 @@ function drawBuildProofCard() {
 }
 
 $("#downloadProof").addEventListener("click", () => {
-  const canvas = drawBuildProofCard();
+  const canvas = drawAddressSnapshotCard();
   if (!canvas) return;
   const link = document.createElement("a");
-  link.download = `elysium-build-proof-${networkState.addressProof.address.slice(0, 8)}.png`;
+  link.download = `elysium-address-snapshot-${networkState.addressSnapshot.address.slice(0, 8)}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
-  $("#probeStatus").textContent = "1200×630 build-proof card downloaded.";
+  $("#probeStatus").textContent = "1200×630 address snapshot downloaded.";
 });
 
 $("#copyProof").addEventListener("click", async () => {
-  const proof = networkState.addressProof;
-  if (!proof) return;
+  const snapshot = networkState.addressSnapshot;
+  if (!snapshot) return;
   const text = [
-    "Elysium Build Proof — Ascend Flow Lab",
+    "Elysium Address Snapshot — Ascend Flow Lab",
     `Network: Elysium testnet (chain 99801)`,
-    `Observed block: ${networkState.block ? `#${networkState.block}` : "latest"}`,
-    `Address: ${proof.address}`,
-    `Verdict: ${proof.verdict}`,
-    `Bytecode: ${proof.byteCount.toLocaleString("en-US")} bytes`,
-    `Balance: ${proof.balance}`,
-    `Nonce: ${proof.nonce}`,
-    `Verified: ${new Date().toISOString()}`,
-    "Read-only RPC observation. Unofficial community tool.",
+    `Block used: #${snapshot.observedBlock}`,
+    `Address: ${snapshot.address}`,
+    `Network result: ${snapshot.verdict}`,
+    `Bytecode: ${snapshot.byteCount.toLocaleString("en-US")} bytes`,
+    `Balance: ${snapshot.balance}`,
+    `Nonce: ${snapshot.nonce}`,
+    `Observed: ${new Date().toISOString()}`,
+    "Read-only RPC snapshot. It does not prove ownership, authorship or Ascend test participation.",
+    "Unofficial community tool.",
     location.href,
   ].join("\n");
   try {
     await navigator.clipboard.writeText(text);
-    $("#probeStatus").textContent = "Build proof copied.";
+    $("#probeStatus").textContent = "Address snapshot copied.";
   } catch {
     $("#probeStatus").textContent = "Clipboard access was unavailable.";
   }

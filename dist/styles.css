@@ -1501,7 +1501,7 @@ a {
 
 .known-unknown-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .known-unknown-grid > div {
@@ -1524,6 +1524,7 @@ a {
 }
 
 .signal.known { background: var(--mint); }
+.signal.planned { background: var(--cobalt-soft); }
 .signal.unknown { background: var(--orange); }
 
 .known-unknown-grid strong {
@@ -1643,6 +1644,38 @@ a {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.current-boundary {
+  max-width: 650px;
+  margin-top: 26px;
+  padding: 18px;
+  border: 1px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--orange);
+  background: rgba(255, 248, 251, 0.58);
+}
+
+.current-boundary > span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.current-boundary p {
+  margin: 12px 0;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.current-boundary a {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-decoration: none;
+  text-transform: uppercase;
 }
 
 .source-list {
@@ -1917,6 +1950,12 @@ a {
   .nft-section,
   .sources-section { padding-top: 75px; padding-bottom: 80px; }
   .nft-instrument, .share-card, .source-list { margin-top: 38px; }
+
+  .known-unknown-grid { grid-template-columns: 1fr; }
+  .known-unknown-grid > div + div {
+    border-top: 1px solid #604b58;
+    border-left: 0;
+  }
 
   .share-card {
     padding: 18px;

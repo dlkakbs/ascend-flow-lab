@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Ascend Flow Lab is an unofficial interactive explorer for Ascend's proposed fee and capital allocation model on Elysium."
+      content="Ascend Flow Lab is an unofficial, read-only Elysium testnet telemetry tool and interactive model of Ascend's proposed fee allocation."
     />
     <meta name="theme-color" content="#f6e8ef" />
     <meta property="og:title" content="Ascend Flow Lab" />
-    <meta property="og:description" content="Read Elysium live. Follow every dollar through Ascend's proposed economic model." />
-    <title>Ascend Flow Lab — Live Elysium proof and protocol economics</title>
+    <meta property="og:description" content="Read Elysium live. Model how trading fees move through Ascend's proposed economic design." />
+    <title>Ascend Flow Lab — Live Elysium telemetry and proposed protocol economics</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./app.js" defer></script>
@@ -25,7 +25,7 @@
       </a>
       <div class="header-meta">
         <span class="status-pill">Unofficial community tool</span>
-        <a href="#proof">Live proof</a>
+        <a href="#proof">Live telemetry</a>
         <a href="#sources">Sources</a>
         <button class="text-button" id="resetButton" type="button">Reset model</button>
       </div>
@@ -39,11 +39,11 @@
         </div>
 
         <div class="hero-copy">
-          <p class="eyebrow">Live Elysium proof × Ascend economics</p>
-          <h1 id="hero-title">Follow<br /><em>every</em> dollar.</h1>
+          <p class="eyebrow">Live Elysium telemetry × proposed Ascend economics</p>
+          <h1 id="hero-title">Follow<br /><em>every fee</em> dollar.</h1>
           <p class="hero-lede">
-            Read the Elysium testnet directly, inspect any address, then turn trading activity
-            into a traceable map of creator payouts, HYPE purchases and ecosystem support.
+            Read Elysium’s public testnet directly, inspect an address, then model how a
+            hypothetical trading-volume scenario would allocate fees across the published proposal.
           </p>
           <div class="hero-actions">
             <a class="primary-action" href="#proof">Verify the chain <span aria-hidden="true">↓</span></a>
@@ -56,7 +56,7 @@
         <aside class="hero-ledger" aria-label="Model facts">
           <div class="ledger-heading">
             <span>MODEL BASIS</span>
-            <span>OCT 2026</span>
+            <span>SEP 2026 LITEPAPER</span>
           </div>
           <dl>
             <div>
@@ -96,9 +96,9 @@
             <h2 id="proof-title">Live network<br />data.</h2>
           </div>
           <p class="section-intro">
-            Every value in this panel is requested from Elysium’s public testnet RPC in your browser.
-            No wallet connection, signature or transaction is required. This read-only tool does not
-            create onchain activity.
+            The live telemetry below is requested from Elysium’s public testnet RPC in your browser.
+            No wallet connection, signature or transaction is required. This read-only tool creates
+            no onchain activity.
           </p>
         </div>
 
@@ -176,7 +176,7 @@
 
             <div class="probe-empty" id="probeEmpty">
               <span>↳</span>
-              <p>Paste an Elysium testnet address to create a verifiable builder snapshot.</p>
+              <p>Paste an Elysium testnet address to create a block-specific network snapshot.</p>
             </div>
 
             <div class="probe-result" id="probeResult" hidden>
@@ -191,8 +191,8 @@
                 <div><dt>Nonce</dt><dd id="resultNonce">—</dd></div>
               </dl>
               <div class="probe-actions">
-                <button class="primary-action" id="copyProof" type="button">Copy build proof</button>
-                <button class="secondary-action" id="downloadProof" type="button">Download card ↓</button>
+                <button class="primary-action" id="copyProof" type="button">Copy address snapshot</button>
+                <button class="secondary-action" id="downloadProof" type="button">Download snapshot ↓</button>
                 <a class="secondary-action explorer-action" id="explorerLink" href="https://elysium.kinetiq.xyz/testnet-explorer" target="_blank" rel="noreferrer">Open explorer ↗</a>
               </div>
             </div>
@@ -278,7 +278,7 @@
 
             <div class="model-note">
               <span aria-hidden="true">※</span>
-              <p>Separate swap fees, network fees, execution costs and price movement are excluded.</p>
+              <p>Outputs are USD-equivalent allocations, not token quantities. Separate swap fees, network fees, execution costs and price movement are excluded.</p>
             </div>
           </aside>
 
@@ -373,7 +373,7 @@
                     </li>
                     <li>
                       <span class="destination-number">10%</span>
-                      <div><strong>Direct staker rewards</strong><small>The only pool affected by eligible NFT weighting</small></div>
+                      <div><strong>Direct staker rewards</strong><small>Proposed NFT weighting applies only here</small></div>
                       <b data-value="hypeRewards">$375</b>
                     </li>
                   </ol>
@@ -472,9 +472,10 @@
           <p class="eyebrow">Ascend NFT mechanics</p>
           <h2 id="nft-title">NFT reward<br />weighting.</h2>
           <p>
-            Ascend’s docs place the NFT benefit inside the direct HYPE staker reward pool.
-            Eligible NFT holders receive a higher weight when that fixed pool is distributed.
-            Exact tier boosts and eligibility thresholds are not final.
+            Ascend’s proposed model places the NFT benefit inside the direct HYPE reward pool.
+            An eligible NFT increases the weight applied to its holder’s eligible HYPE stake for
+            that distribution. The pool size varies with protocol revenue and HYPE purchase prices;
+            the NFT does not add funds to it. Exact boosts and eligibility thresholds remain undisclosed.
           </p>
           <a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer">
             Verify in the Ascend NFT docs <span aria-hidden="true">↗</span>
@@ -489,18 +490,23 @@
           <div class="pool-visual" aria-hidden="true">
             <span class="pool-base"></span>
             <span class="pool-slice"></span>
-            <div class="pool-label">Fixed pool<br /><strong>100%</strong></div>
+            <div class="pool-label">Existing pool<br /><strong>100%</strong></div>
           </div>
           <div class="known-unknown-grid">
             <div>
-              <span class="signal known">Known</span>
-              <strong>Reward weighting increases</strong>
+              <span class="signal known">Proposed</span>
+              <strong>Higher reward weighting</strong>
               <p>Requires an eligible HYPE staking position.</p>
+            </div>
+            <div>
+              <span class="signal planned">Mint plan</span>
+              <strong>500 supply · free mint</strong>
+              <p>Builders are one planned access group; inclusion does not guarantee a whitelist allocation.</p>
             </div>
             <div>
               <span class="signal unknown">Undisclosed</span>
               <strong>Exact boost rates</strong>
-              <p>Tier quantities and eligibility thresholds are not final.</p>
+              <p>Tier quantities, thresholds and exact boosts are not published.</p>
             </div>
           </div>
         </div>
@@ -519,9 +525,9 @@
             </div>
             <p class="copy-status" id="copyStatus" aria-live="polite"></p>
           </div>
-          <div class="share-card" id="shareCard" aria-label="Share card preview">
+          <div class="share-card" id="shareCard" aria-label="Proposed fee-model share card preview">
             <div class="share-card-top"><span>ASCEND FLOW LAB</span><span id="cardPeriod">DAILY MODEL</span></div>
-            <p>Every <strong data-card="volume">$1M</strong> in token volume routes:</p>
+            <p>At a 1% fee, <strong data-card="volume">$1M</strong> in token volume produces:</p>
             <div class="share-card-main">
               <div><small>RECIPIENT</small><strong data-card="recipient">$2.5K</strong></div>
               <span aria-hidden="true">→</span>
@@ -543,15 +549,25 @@
           <p>
             This tool models the published proposal. It is not affiliated with Ascend, Kinetiq or Elysium,
             and it is not a forecast, audit, investment recommendation or statement of final protocol behavior.
+            It does not connect to Ascend’s gated application or prove participation in an Ascend test.
           </p>
+          <aside class="current-boundary" aria-label="Current access boundary">
+            <span>CURRENT BOUNDARY · CHECKED 10 OCT 2026</span>
+            <p>Elysium’s public testnet RPC, explorer, faucet and bridge are accessible. Ascend’s application currently shows private access. This site reads Elysium only and sends no transactions.</p>
+            <a href="https://ascendlaunch.xyz" target="_blank" rel="noreferrer">Check Ascend access ↗</a>
+          </aside>
         </div>
         <ol class="source-list">
-          <li><span>01</span><a href="https://elysium.kinetiq.xyz/docs/building-on-elysium" target="_blank" rel="noreferrer"><strong>Building on Elysium</strong><small>RPC, chain ID and HYPE gas configuration</small></a></li>
-          <li><span>02</span><a href="https://elysium.kinetiq.xyz/docs/chain-specifications" target="_blank" rel="noreferrer"><strong>Chain Specifications</strong><small>Official rollup and network parameters</small></a></li>
-          <li><span>03</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
-          <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation" target="_blank" rel="noreferrer"><strong>Revenue &amp; Capital Allocation</strong><small>HYPE and KNTQ routing</small></a></li>
-          <li><span>05</span><a href="https://ascendlaunch.gitbook.io/docs/hype-staking" target="_blank" rel="noreferrer"><strong>HYPE Staking</strong><small>Reward sources and constraints</small></a></li>
-          <li><span>06</span><a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer"><strong>Ascend NFTs</strong><small>Weighting, tiers and mint access</small></a></li>
+          <li><span>01</span><a href="https://elysium.kinetiq.xyz/docs/what-is-elysium" target="_blank" rel="noreferrer"><strong>What is Elysium</strong><small>Architecture, HyperEVM settlement and HYPE gas</small></a></li>
+          <li><span>02</span><a href="https://elysium.kinetiq.xyz/docs/building-on-elysium" target="_blank" rel="noreferrer"><strong>Building on Elysium</strong><small>RPC, chain ID and developer configuration</small></a></li>
+          <li><span>03</span><a href="https://elysium.kinetiq.xyz/docs/chain-specifications" target="_blank" rel="noreferrer"><strong>Chain Specifications</strong><small>Official rollup and network parameters</small></a></li>
+          <li><span>04</span><a href="https://ascendlaunch.gitbook.io/docs" target="_blank" rel="noreferrer"><strong>About Ascend</strong><small>Scope, proposed status and no protocol token</small></a></li>
+          <li><span>05</span><a href="https://ascendlaunch.gitbook.io/docs/the-ascend-token-lifecycle" target="_blank" rel="noreferrer"><strong>Token Lifecycle</strong><small>Launch, Ascended, HyperCore spot and HIP-3 pathway</small></a></li>
+          <li><span>06</span><a href="https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown" target="_blank" rel="noreferrer"><strong>Trading Fee Breakdown</strong><small>1% fee and recipient alternatives</small></a></li>
+          <li><span>07</span><a href="https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation" target="_blank" rel="noreferrer"><strong>Revenue &amp; Capital Allocation</strong><small>HYPE and KNTQ routing</small></a></li>
+          <li><span>08</span><a href="https://ascendlaunch.gitbook.io/docs/hype-staking" target="_blank" rel="noreferrer"><strong>HYPE Staking</strong><small>Reward sources and constraints</small></a></li>
+          <li><span>09</span><a href="https://ascendlaunch.gitbook.io/docs/ascend-nfts" target="_blank" rel="noreferrer"><strong>Ascend NFTs</strong><small>Planned weighting, tiers and mint access</small></a></li>
+          <li><span>10</span><a href="https://ascendlaunch.gitbook.io/docs/implementation-controls-and-risk" target="_blank" rel="noreferrer"><strong>Implementation Controls &amp; Risk</strong><small>Undeployed features, discretion and unresolved controls</small></a></li>
         </ol>
       </section>
     </main>
