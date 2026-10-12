@@ -150,7 +150,7 @@ function setText(selector, value) {
 function updateUrl() {
   const params = new URLSearchParams();
   params.set("module", state.module);
-  params.set("v", String(Math.round(state.dailyVolume)));
+  params.set("volume", String(Math.round(state.dailyVolume)));
   params.set("role", state.recipient);
   params.set("period", state.period);
   if (state.address) params.set("address", state.address);
@@ -786,7 +786,7 @@ $("#downloadProof").addEventListener("click", () => {
   link.download = `elysium-address-snapshot-${networkState.addressSnapshot.address.slice(0, 8)}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
-  $("#builderStatus").textContent = "1200×630 builder proof card downloaded.";
+  $("#builderStatus").textContent = "1200×630 address snapshot downloaded.";
 });
 
 $("#copyProof").addEventListener("click", async () => {
@@ -810,7 +810,7 @@ $("#copyProof").addEventListener("click", async () => {
   ].join("\n");
   try {
     await navigator.clipboard.writeText(text);
-    $("#builderStatus").textContent = "Builder proof text copied.";
+    $("#builderStatus").textContent = "Address snapshot text copied.";
   } catch {
     $("#builderStatus").textContent = "Clipboard access was unavailable.";
   }
@@ -933,8 +933,8 @@ $("#loadTopToken").addEventListener("click", async () => {
 
 function hydrateFromUrl() {
   const params = new URLSearchParams(location.search);
-  const hasVolume = params.has("v");
-  const volume = hasVolume ? Number(params.get("v")) : Number.NaN;
+  const volumeParam = params.get("volume") ?? params.get("v");
+  const volume = volumeParam !== null ? Number(volumeParam) : Number.NaN;
   const recipient = params.get("role");
   const period = params.get("period");
   const address = params.get("address") || "";

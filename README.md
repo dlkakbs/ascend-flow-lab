@@ -13,13 +13,15 @@ The interface connects directly to public Elysium endpoints. It never asks for a
 | Pulse | Live | Shows chain status, latest block, gas, latency, index totals and recent blocks | Elysium RPC + explorer API |
 | Radar | Live | Lists recently indexed verified contracts | Elysium explorer API |
 | Inspect | Live | Reads bytecode, native HYPE balance and outgoing nonce at one observed block | Elysium RPC |
-| Builder Proof | Live | Turns the latest address observation into copyable text or a 1200×630 card | Local export of RPC data |
+| Builder Snapshot | Live | Turns the latest address observation into copyable text or a 1200×630 card | Local export of RPC data |
 | Project Lens | Live | Shows indexed ERC-20 metrics and holder concentration when that index is available | Elysium explorer API |
 | Atlas | Soon | Planned curated directory for source-linked projects and contracts | Requires a verification workflow |
 | Ascend Model | Reference | Models the fee routes described in Ascend's published proposal | Ascend documentation |
 | Roadmap | Live | Separates shipped functions from planned work | Project status |
 
 Public index endpoints can be slow or temporarily unavailable. When a source does not respond, the interface says so and does not substitute estimated data.
+
+RPC telemetry refreshes about every 15 seconds, and explorer totals refresh every 60 seconds. Contract Radar updates on page load or when refreshed manually. Protocol documentation is reviewed manually and carries a separate review date in the interface.
 
 ## Data boundaries
 
@@ -31,7 +33,7 @@ Public index endpoints can be slow or temporarily unavailable. When a source doe
 
 Address snapshots describe only public chain state. They do not prove ownership, contract authorship, builder status, Ascend test participation or whitelist eligibility.
 
-Project Lens displays raw explorer observations. It does not assign an “Ascended” score or infer whether a project qualifies for Ascend support. Ascend's exact qualification thresholds are not published.
+Project Lens displays raw testnet explorer observations. Testnet price, volume and market-cap fields may be sparse, experimental or manipulated; they are not proof of project quality. The module does not assign an “Ascended” score or infer whether a project qualifies for Ascend support. Ascend's exact qualification thresholds are not published.
 
 ## Ascend model
 
@@ -74,7 +76,10 @@ The production deployment serves `dist/` through Vercel.
 - [Ascend documentation](https://ascendlaunch.gitbook.io/docs)
 - [Trading Fee Breakdown](https://ascendlaunch.gitbook.io/docs/trading-fee-breakdown)
 - [Revenue & Capital Allocation](https://ascendlaunch.gitbook.io/docs/revenue-and-capital-allocation)
+- [Recurring Ecosystem Support](https://ascendlaunch.gitbook.io/docs/recurring-ecosystem-support)
+- [Trading Profiles & Referrals](https://ascendlaunch.gitbook.io/docs/trading-profiles-and-referrals)
 - [Ascend NFTs](https://ascendlaunch.gitbook.io/docs/ascend-nfts)
+- [Implementation Controls & Risk](https://ascendlaunch.gitbook.io/docs/implementation-controls-and-risk)
 
 ## Disclaimer
 
