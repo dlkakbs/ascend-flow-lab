@@ -1936,9 +1936,14 @@ a {
 .module-rail .mini-action {
   width: 100%;
   min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-color: var(--ink);
   color: var(--ink);
   background: var(--white);
+  text-align: center;
+  text-decoration: none;
 }
 
 .module-state {
