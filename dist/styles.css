@@ -1771,7 +1771,8 @@ a {
 }
 
 .module-nav-track {
-  width: min(100%, var(--max));
+  width: max-content;
+  max-width: min(calc(100% - 48px), var(--max));
   margin-inline: auto;
   display: flex;
   overflow-x: auto;
@@ -1796,11 +1797,6 @@ a {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
-}
-
-.module-nav button > span {
-  color: var(--line-dark);
-  font-size: 8px;
 }
 
 .module-nav button small {
@@ -2154,6 +2150,7 @@ a {
   .site-header { min-height: 58px; padding: 0 16px; }
   .header-meta .status-pill { display: none; }
   .header-meta { gap: 14px; }
+  .module-nav-track { max-width: calc(100% - 24px); }
 
   .page-grid,
   .workbench,
@@ -2269,6 +2266,7 @@ a {
 }
 
 @media (max-width: 680px) {
+  .module-nav-track { max-width: calc(100% - 20px); }
   .header-meta a { display: none; }
   .wordmark { font-size: 11px; }
   .text-button { font-size: 9px; }
