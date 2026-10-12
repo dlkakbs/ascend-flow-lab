@@ -35,7 +35,7 @@ const networkState = {
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
 
-const MODULES = new Set(["pulse", "radar", "inspect", "builder", "lens", "atlas", "model", "roadmap"]);
+const MODULES = new Set(["pulse", "radar", "inspect", "builder", "lens", "atlas", "ascend", "model", "roadmap"]);
 
 function setActiveModule(moduleName, { focus = false, scroll = false } = {}) {
   const nextModule = MODULES.has(moduleName) ? moduleName : "pulse";

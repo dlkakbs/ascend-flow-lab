@@ -15,7 +15,8 @@ The interface connects directly to public Elysium endpoints. It never asks for a
 | Inspect | Live | Reads bytecode, native HYPE balance and outgoing nonce at one observed block | Elysium RPC |
 | Builder Snapshot | Live | Turns the latest address observation into copyable text or a 1200×630 card | Local export of RPC data |
 | Project Lens | Live | Shows indexed ERC-20 metrics and holder concentration when that index is available | Elysium explorer API |
-| Atlas | Soon | Planned curated directory for source-linked projects and contracts | Requires a verification workflow |
+| Elysium Atlas | Soon | Planned directory for verified projects across Elysium, not only Ascend launches | Requires verified project identities and official contract links |
+| Ascend Activity | Soon | Planned Ascend-only view of launches, trades and fee flows | Requires official Ascend contracts, events or a public API |
 | Ascend Model | Reference | Models the fee routes described in Ascend's published proposal | Ascend documentation |
 | Roadmap | Live | Separates shipped functions from planned work | Project status |
 
@@ -35,6 +36,10 @@ Address snapshots describe only public chain state. They do not prove ownership,
 
 Project Lens displays raw testnet explorer observations. Testnet price, volume and market-cap fields may be sparse, experimental or manipulated; they are not proof of project quality. The module does not assign an “Ascended” score or infer whether a project qualifies for Ascend support. Ascend's exact qualification thresholds are not published.
 
+The live modules observe the wider Elysium testnet. They do not currently identify Ascend-specific activity. Ascend Activity will remain marked **Soon** until official testnet contract addresses, event definitions or a public API make reliable protocol-level filtering possible. General Elysium transactions will not be relabeled as Ascend transactions.
+
+Elysium Atlas is a separate planned layer: it is intended to cover verified projects across the Elysium ecosystem, whether or not they launched through Ascend.
+
 ## Ascend model
 
 The reference model follows the parameters documented by Ascend, including the proposed 1% trading fee, recipient alternatives, HYPE/KNTQ purchase routes and NFT reward weighting. Users can change the assumed volume, recipient arrangement and time period, compare scenarios and export the result.
@@ -43,7 +48,7 @@ The output is an illustrative USD-equivalent allocation—not a forecast or toke
 
 ## Roadmap
 
-Current work focuses on reliable public data rather than inferred project labels. Planned additions include longer activity windows, contract-to-deployer relationship views, local comparison sets and a curated ecosystem Atlas backed by verified project submissions and official contract links.
+Current work focuses on reliable public data rather than inferred project labels. Planned additions include longer activity windows, contract-to-deployer relationship views and local comparison sets. Two distinct verified layers are planned: an Elysium-wide Atlas backed by project submissions and official contract links, and an Ascend Activity view that depends on official Ascend testnet identifiers becoming public.
 
 ## Run locally
 
