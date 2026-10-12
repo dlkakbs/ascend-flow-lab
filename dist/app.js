@@ -693,9 +693,9 @@ function drawAddressSnapshotCard() {
   const ctx = canvas.getContext("2d");
   const { width, height } = canvas;
 
-  ctx.fillStyle = "#0b0c10";
+  ctx.fillStyle = "#fff8fb";
   ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = "#342833";
+  ctx.strokeStyle = "#ead2df";
   ctx.lineWidth = 1;
   for (let x = 0; x <= width; x += 32) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
@@ -720,7 +720,7 @@ function drawAddressSnapshotCard() {
   ctx.fillText("ELYSIUM TESTNET · CHAIN 99801 · READ ONLY", 0, 0);
   ctx.restore();
 
-  ctx.fillStyle = "#fff8fb";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 19px Arial";
   ctx.fillText("ASCEND FLOW LAB / ADDRESS SNAPSHOT", 238, 60);
   ctx.textAlign = "right";
@@ -729,19 +729,19 @@ function drawAddressSnapshotCard() {
   ctx.fillText("● LIVE RPC OBSERVATION", width - 58, 60);
   ctx.textAlign = "left";
 
-  ctx.fillStyle = "#fff8fb";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "68px Georgia";
   ctx.fillText("Address", 238, 162);
-  ctx.fillStyle = "#fed6af";
+  ctx.fillStyle = "#7651c4";
   ctx.font = "italic 78px Georgia";
   ctx.fillText("snapshot.", 492, 162);
 
-  ctx.strokeStyle = "#6f5d68";
+  ctx.strokeStyle = "#b89aaa";
   ctx.strokeRect(238, 208, width - 296, 104);
-  ctx.fillStyle = "#bba8b3";
+  ctx.fillStyle = "#6f5d68";
   ctx.font = "700 14px monospace";
   ctx.fillText("OBSERVED ADDRESS", 262, 242);
-  ctx.fillStyle = "#fff8fb";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 24px monospace";
   ctx.fillText(snapshot.address, 262, 286);
 
@@ -753,23 +753,23 @@ function drawAddressSnapshotCard() {
   const boxWidth = (width - 296) / 3;
   stats.forEach(([label, value], index) => {
     const x = 238 + boxWidth * index;
-    ctx.strokeStyle = "#6f5d68";
+    ctx.strokeStyle = "#b89aaa";
     ctx.strokeRect(x, 344, boxWidth, 142);
     ctx.fillStyle = index === 0 ? "#feaa8d" : index === 1 ? "#8b61d7" : "#ee84b5";
     ctx.fillRect(x, 344, boxWidth, 9);
-    ctx.fillStyle = "#bba8b3";
+    ctx.fillStyle = "#6f5d68";
     ctx.font = "700 13px monospace";
     ctx.fillText(label, x + 22, 390);
-    ctx.fillStyle = "#fff8fb";
+    ctx.fillStyle = "#0b0c10";
     ctx.font = index === 0 ? "700 22px Arial" : "700 29px monospace";
     const clipped = value.length > 25 ? `${value.slice(0, 23)}…` : value;
     ctx.fillText(clipped, x + 22, 446);
   });
 
-  ctx.fillStyle = "#bba8b3";
+  ctx.fillStyle = "#6f5d68";
   ctx.font = "15px Arial";
   ctx.fillText("Public-RPC snapshot · no ownership or authorship claim · no wallet connection · independent", 238, 548);
-  ctx.fillStyle = "#fff8fb";
+  ctx.fillStyle = "#0b0c10";
   ctx.font = "700 14px monospace";
   ctx.fillText(`GAS ${networkState.gasGwei || "—"} GWEI`, 238, 586);
   ctx.textAlign = "right";
